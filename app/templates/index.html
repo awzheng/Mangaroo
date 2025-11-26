@@ -1,0 +1,423 @@
+<!--
+========================================
+MyMangaka - Upload Page (index.html)
+========================================
+
+This is the landing page where users upload their PDF novels.
+It features a drag-and-drop upload area with a modern, clean design.
+
+KEY CONCEPTS:
+- Jinja2 Templates: HTML files with {{ variables }} that get filled in by Python
+- TailwindCSS: A CSS framework loaded from CDN for styling
+- JavaScript: Handles file upload, drag-and-drop, and form submission
+
+PAGE FLOW:
+1. User sees upload area
+2. User drags PDF or clicks to select
+3. File is validated (PDF only, max 50MB)
+4. File is uploaded to /api/upload
+5. User is redirected to /reader/{session_id}
+-->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <!-- Standard HTML meta tags -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <!-- 
+    Page title - uses Jinja2 variable {{ title }}
+    This is set in main.py when rendering the template
+    -->
+    <title>{{ title }}</title>
+    
+    <!-- 
+    ========================================
+    FONTS
+    ========================================
+    Loading the Inter font from Google Fonts
+    -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- 
+    ========================================
+    TAILWINDCSS CDN
+    ========================================
+    TailwindCSS is a utility-first CSS framework
+    Instead of writing CSS, you add classes like "bg-blue-500" directly to HTML
+    -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Our custom styles (colors, fonts, etc.) -->
+    <link rel="stylesheet" href="/static/css/styles.css">
+    
+    <!-- 
+    ========================================
+    TAILWIND CONFIGURATION
+    ========================================
+    This configures Tailwind with our custom colors (Webtoon green, etc.)
+    -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    // Custom colors for our app
+                    colors: {
+                        'webtoon': {
+                            'green': '#60D071',      // Primary brand color
+                            'green-hover': '#4DBE5E', // Darker for hover states
+                        },
+                        'manga': {
+                            'dark': '#3C3C3C',   // Dark grey for text
+                            'light': '#F8F8F8',  // Light grey for backgrounds
+                        }
+                    },
+                    // Custom font families
+                    fontFamily: {
+                        'futura': ['Futura', 'Trebuchet MS', 'Arial', 'sans-serif'],
+                        'inter': ['Inter', 'system-ui', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+
+<body class="bg-white min-h-screen font-inter">
+    <!-- 
+    ========================================
+    MAIN CONTAINER
+    ========================================
+    This is the main content area, centered on the page
+    -->
+    <div class="index-container">
+        
+        <!-- 
+        ========================================
+        LOGO SECTION
+        ========================================
+        The MyMangaka logo with tagline
+        -->
+        <div class="logo fade-in">
+            <h1 class="logo-text">
+                <!-- SVG icon representing stacked books/pages -->
+                <svg class="w-12 h-12" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <!-- Back page (dark) -->
+                    <rect x="4" y="6" width="28" height="36" rx="2" stroke="#3C3C3C" stroke-width="2.5" fill="none"/>
+                    <!-- Front page (green accent) -->
+                    <rect x="16" y="6" width="28" height="36" rx="2" stroke="#60D071" stroke-width="2.5" fill="white"/>
+                    <!-- Text lines on the page -->
+                    <path d="M22 18H38M22 24H38M22 30H32" stroke="#3C3C3C" stroke-width="2" stroke-linecap="round"/>
+                </svg>
+                <!-- "My" in dark, "Mangaka" in green -->
+                My<span>Mangaka</span>
+            </h1>
+            <p class="tagline">Transform your novels into stunning manga illustrations</p>
+        </div>
+        
+        <!-- 
+        ========================================
+        UPLOAD CARD
+        ========================================
+        The main upload interface
+        -->
+        <div class="upload-card fade-in" style="animation-delay: 0.1s;">
+            <!-- 
+            Form for file upload
+            enctype="multipart/form-data" is required for file uploads
+            -->
+            <form id="uploadForm" enctype="multipart/form-data">
+                
+                <!-- 
+                ========================================
+                DROP ZONE
+                ========================================
+                The drag-and-drop area for files
+                -->
+                <div class="upload-zone" id="dropZone">
+                    <!-- Upload icon -->
+                    <div class="upload-icon">
+                        <svg viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <!-- Arrow pointing up -->
+                            <path d="M40 10V50M40 10L25 25M40 10L55 25" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+                            <!-- Container/tray shape -->
+                            <path d="M10 50V60C10 65.5228 14.4772 70 20 70H60C65.5228 70 70 65.5228 70 60V50" stroke="currentColor" stroke-width="4" stroke-linecap="round"/>
+                        </svg>
+                    </div>
+                    <h3 class="text-xl font-semibold text-manga-dark mb-2">Drop your PDF here</h3>
+                    <p class="text-gray-500 mb-4">or click to browse files</p>
+                    <p class="text-sm text-gray-400">Maximum file size: 50MB</p>
+                    
+                    <!-- 
+                    Hidden file input
+                    The visible drop zone triggers this when clicked
+                    accept=".pdf" restricts to PDF files only
+                    -->
+                    <input type="file" id="fileInput" name="file" accept=".pdf" class="hidden">
+                </div>
+                
+                <!-- 
+                ========================================
+                FILE PREVIEW
+                ========================================
+                Shown after a file is selected (hidden by default)
+                -->
+                <div id="filePreview" class="hidden mt-6 p-4 bg-manga-light rounded-xl">
+                    <div class="flex items-center gap-4">
+                        <!-- PDF icon -->
+                        <div class="w-12 h-12 bg-webtoon-green/10 rounded-lg flex items-center justify-center">
+                            <svg class="w-6 h-6 text-webtoon-green" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                            </svg>
+                        </div>
+                        <!-- File info -->
+                        <div class="flex-1 min-w-0">
+                            <p id="fileName" class="font-semibold text-manga-dark truncate"></p>
+                            <p id="fileSize" class="text-sm text-gray-500"></p>
+                        </div>
+                        <!-- Remove button -->
+                        <button type="button" id="removeFile" class="text-gray-400 hover:text-red-500 transition-colors">
+                            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- 
+                ========================================
+                SUBMIT BUTTON
+                ========================================
+                Starts disabled, enabled when file is selected
+                -->
+                <button type="submit" id="submitBtn" class="btn btn-primary btn-lg w-full mt-6" disabled>
+                    <!-- Lightning bolt icon -->
+                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                    </svg>
+                    Start Reading
+                </button>
+            </form>
+        </div>
+        
+        <!-- 
+        ========================================
+        FEATURES SECTION
+        ========================================
+        Three feature highlights below the upload card
+        -->
+        <div class="mt-12 grid grid-cols-1 md:grid-cols-3 gap-6 max-w-3xl fade-in" style="animation-delay: 0.2s;">
+            <!-- Feature 1: Smart Reading -->
+            <div class="text-center p-4">
+                <div class="w-12 h-12 bg-webtoon-green/10 rounded-full flex items-center justify-center mx-auto mb-3">
+                    <svg class="w-6 h-6 text-webtoon-green" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                    </svg>
+                </div>
+                <h4 class="font-semibold text-manga-dark">Smart Reading</h4>
+                <p class="text-sm text-gray-500 mt-1">AI-powered text analysis</p>
+            </div>
+            
+            <!-- Feature 2: Manga Generation -->
+            <div class="text-center p-4">
+                <div class="w-12 h-12 bg-webtoon-green/10 rounded-full flex items-center justify-center mx-auto mb-3">
+                    <svg class="w-6 h-6 text-webtoon-green" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                    </svg>
+                </div>
+                <h4 class="font-semibold text-manga-dark">Manga Generation</h4>
+                <p class="text-sm text-gray-500 mt-1">Beautiful AI illustrations</p>
+            </div>
+            
+            <!-- Feature 3: Story Context -->
+            <div class="text-center p-4">
+                <div class="w-12 h-12 bg-webtoon-green/10 rounded-full flex items-center justify-center mx-auto mb-3">
+                    <svg class="w-6 h-6 text-webtoon-green" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                    </svg>
+                </div>
+                <h4 class="font-semibold text-manga-dark">Story Context</h4>
+                <p class="text-sm text-gray-500 mt-1">Maintains visual continuity</p>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 
+    ========================================
+    LOADING OVERLAY
+    ========================================
+    Full-screen overlay shown while uploading
+    -->
+    <div id="loadingOverlay" class="loading-overlay">
+        <div class="loading-spinner"></div>
+        <p class="text-lg font-medium text-manga-dark">Processing your novel...</p>
+        <p class="text-gray-500">This may take a moment</p>
+    </div>
+
+    <!-- 
+    ========================================
+    JAVASCRIPT
+    ========================================
+    Handles all the interactivity:
+    - Drag and drop
+    - File validation
+    - Form submission
+    - Loading states
+    -->
+    <script>
+        // ========================================
+        // DOM ELEMENT REFERENCES
+        // ========================================
+        // Get references to important elements we'll interact with
+        const dropZone = document.getElementById('dropZone');
+        const fileInput = document.getElementById('fileInput');
+        const uploadForm = document.getElementById('uploadForm');
+        const filePreview = document.getElementById('filePreview');
+        const fileName = document.getElementById('fileName');
+        const fileSize = document.getElementById('fileSize');
+        const removeFile = document.getElementById('removeFile');
+        const submitBtn = document.getElementById('submitBtn');
+        const loadingOverlay = document.getElementById('loadingOverlay');
+        
+        // Track the currently selected file
+        let selectedFile = null;
+        
+        // ========================================
+        // UTILITY FUNCTIONS
+        // ========================================
+        
+        /**
+         * Format bytes into human-readable size
+         * e.g., 1024 → "1 KB", 1048576 → "1 MB"
+         */
+        function formatFileSize(bytes) {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+        }
+        
+        /**
+         * Handle when a file is selected (via click or drag)
+         * Validates the file and updates the UI
+         */
+        function handleFile(file) {
+            // Exit if no file provided
+            if (!file) return;
+            
+            // Validate: must be a PDF
+            if (!file.name.toLowerCase().endsWith('.pdf')) {
+                alert('Please select a PDF file');
+                return;
+            }
+            
+            // Validate: must be under 50MB
+            if (file.size > 50 * 1024 * 1024) {
+                alert('File is too large. Maximum size is 50MB');
+                return;
+            }
+            
+            // File is valid! Update the UI
+            selectedFile = file;
+            fileName.textContent = file.name;
+            fileSize.textContent = formatFileSize(file.size);
+            
+            // Show preview, hide drop zone
+            filePreview.classList.remove('hidden');
+            dropZone.classList.add('hidden');
+            
+            // Enable the submit button
+            submitBtn.disabled = false;
+        }
+        
+        // ========================================
+        // EVENT LISTENERS
+        // ========================================
+        
+        // Click on drop zone → open file picker
+        dropZone.addEventListener('click', () => fileInput.click());
+        
+        // File selected via picker
+        fileInput.addEventListener('change', (e) => {
+            handleFile(e.target.files[0]);
+        });
+        
+        // ---- DRAG AND DROP ----
+        
+        // Drag over: show hover state
+        dropZone.addEventListener('dragover', (e) => {
+            e.preventDefault();  // Required to allow drop
+            dropZone.classList.add('drag-over');
+        });
+        
+        // Drag leave: remove hover state
+        dropZone.addEventListener('dragleave', () => {
+            dropZone.classList.remove('drag-over');
+        });
+        
+        // Drop: handle the dropped file
+        dropZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dropZone.classList.remove('drag-over');
+            handleFile(e.dataTransfer.files[0]);
+        });
+        
+        // ---- REMOVE FILE ----
+        
+        // Click X button → reset to initial state
+        removeFile.addEventListener('click', () => {
+            selectedFile = null;
+            fileInput.value = '';  // Clear the file input
+            filePreview.classList.add('hidden');
+            dropZone.classList.remove('hidden');
+            submitBtn.disabled = true;
+        });
+        
+        // ========================================
+        // FORM SUBMISSION
+        // ========================================
+        
+        uploadForm.addEventListener('submit', async (e) => {
+            // Prevent normal form submission (page reload)
+            e.preventDefault();
+            
+            if (!selectedFile) return;
+            
+            // Show loading overlay
+            loadingOverlay.classList.add('active');
+            submitBtn.disabled = true;
+            
+            // Create FormData object (for file upload)
+            const formData = new FormData();
+            formData.append('file', selectedFile);
+            
+            try {
+                // Send file to the server
+                const response = await fetch('/api/upload', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                // Parse the JSON response
+                const data = await response.json();
+                
+                if (data.success) {
+                    // Success! Redirect to the reader page
+                    window.location.href = data.redirect_url;
+                } else {
+                    // Server returned an error
+                    throw new Error(data.detail || 'Upload failed');
+                }
+            } catch (error) {
+                // Something went wrong
+                alert('Error: ' + error.message);
+                loadingOverlay.classList.remove('active');
+                submitBtn.disabled = false;
+            }
+        });
+    </script>
+</body>
+</html>

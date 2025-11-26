@@ -1,0 +1,691 @@
+/* 
+ * ========================================
+ * MyMangaka Design System
+ * ========================================
+ * 
+ * This CSS file defines the visual style for the entire app.
+ * It uses CSS Variables (custom properties) for easy customization.
+ * 
+ * COLOR PALETTE (from design spec):
+ * - Primary (Webtoon Green): #60D071
+ * - Secondary (Dark Grey): #3C3C3C
+ * - Background White: #FFFFFF
+ * - Background Light: #F8F8F8
+ * 
+ * FONTS:
+ * - Headers: Futura (or fallbacks)
+ * - Body: Inter (or system sans-serif)
+ * 
+ * LAYOUT:
+ * - Split screen for reader (left: text, right: manga)
+ * - Responsive design for mobile
+ */
+
+/* ============================================
+   CSS VARIABLES
+   ============================================
+   
+   Variables allow you to define values once and reuse them.
+   Syntax: --variable-name: value;
+   Usage: property: var(--variable-name);
+   
+   BENEFITS:
+   - Change a color in ONE place, updates everywhere
+   - Consistent spacing and sizing
+   - Easy theme modifications
+*/
+:root {
+    /* ---- COLORS ---- */
+    /* Primary: The main brand color (Webtoon Green) */
+    --color-primary: #60D071;
+    --color-primary-hover: #4DBE5E;    /* Darker for hover states */
+    --color-primary-light: rgba(96, 208, 113, 0.1);  /* Transparent version */
+    
+    /* Secondary: Dark grey for text and accents */
+    --color-secondary: #3C3C3C;
+    --color-secondary-light: #5C5C5C;
+    
+    /* Backgrounds */
+    --color-bg-white: #FFFFFF;
+    --color-bg-light: #F8F8F8;
+    --color-bg-dark: #1A1A1A;
+    
+    /* Text colors (different weights) */
+    --color-text-primary: #2C2C2C;    /* Main text */
+    --color-text-secondary: #6B6B6B;  /* Less important text */
+    --color-text-light: #9B9B9B;      /* Subtle text */
+    
+    /* Border colors */
+    --color-border: #E5E5E5;
+    --color-border-dark: #3C3C3C;
+    
+    /* ---- TYPOGRAPHY ---- */
+    /* Font families with fallbacks */
+    --font-header: 'Futura', 'Trebuchet MS', Arial, sans-serif;
+    --font-body: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    
+    /* ---- SPACING ---- */
+    /* Consistent spacing scale (rem = relative to root font size) */
+    --spacing-xs: 0.25rem;   /* 4px */
+    --spacing-sm: 0.5rem;    /* 8px */
+    --spacing-md: 1rem;      /* 16px */
+    --spacing-lg: 1.5rem;    /* 24px */
+    --spacing-xl: 2rem;      /* 32px */
+    --spacing-2xl: 3rem;     /* 48px */
+    
+    /* ---- BORDER RADIUS ---- */
+    /* Rounded corners scale */
+    --radius-sm: 4px;
+    --radius-md: 8px;
+    --radius-lg: 12px;
+    --radius-xl: 16px;
+    --radius-full: 9999px;   /* Fully rounded (pills/circles) */
+    
+    /* ---- SHADOWS ---- */
+    /* Box shadow scale for depth */
+    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+    --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.07);
+    --shadow-lg: 0 10px 25px rgba(0, 0, 0, 0.1);
+    --shadow-xl: 0 20px 40px rgba(0, 0, 0, 0.15);
+    
+    /* ---- TRANSITIONS ---- */
+    /* Animation timing */
+    --transition-fast: 150ms ease;
+    --transition-normal: 250ms ease;
+    --transition-slow: 400ms ease;
+}
+
+/* ============================================
+   BASE STYLES (Reset & Defaults)
+   ============================================
+   
+   These rules "reset" browser defaults to ensure
+   consistent behavior across different browsers.
+*/
+
+/* Universal box-sizing (makes width calculations easier) */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;  /* Width includes padding/border */
+}
+
+/* Root font size (1rem = 16px) */
+html {
+    font-size: 16px;
+    scroll-behavior: smooth;  /* Smooth scrolling for anchor links */
+}
+
+/* Body defaults */
+body {
+    font-family: var(--font-body);
+    color: var(--color-text-primary);
+    background-color: var(--color-bg-white);
+    line-height: 1.6;  /* Comfortable reading line height */
+    /* Font smoothing for crisp text */
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+/* ============================================
+   TYPOGRAPHY
+   ============================================
+   
+   Styles for headings and text elements.
+   Headers use Futura font for visual hierarchy.
+*/
+
+/* All headings share these styles */
+h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-header);
+    font-weight: 700;  /* Bold */
+    line-height: 1.2;  /* Tighter line height for headings */
+    color: var(--color-secondary);
+}
+
+/* Heading size scale */
+h1 { font-size: 2.5rem; }   /* 40px */
+h2 { font-size: 2rem; }     /* 32px */
+h3 { font-size: 1.5rem; }   /* 24px */
+h4 { font-size: 1.25rem; }  /* 20px */
+
+/* Paragraph spacing */
+p {
+    margin-bottom: var(--spacing-md);
+}
+
+/* ============================================
+   BUTTONS
+   ============================================
+   
+   Button styles with different variants:
+   - .btn: Base button styles
+   - .btn-primary: Green main action button
+   - .btn-secondary: Dark grey button
+   - .btn-outline: Bordered button
+   - .btn-lg: Larger size
+*/
+
+/* Base button styles */
+.btn {
+    /* Flexbox for icon + text alignment */
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--spacing-sm);
+    
+    /* Padding and sizing */
+    padding: var(--spacing-sm) var(--spacing-lg);
+    
+    /* Typography */
+    font-family: var(--font-body);
+    font-size: 0.95rem;
+    font-weight: 600;
+    text-decoration: none;
+    
+    /* Appearance */
+    border: none;
+    border-radius: var(--radius-lg);
+    cursor: pointer;
+    
+    /* Smooth transitions on hover */
+    transition: all var(--transition-normal);
+}
+
+/* Primary button (Webtoon Green) */
+.btn-primary {
+    background-color: var(--color-primary);
+    color: white;
+    box-shadow: var(--shadow-md);
+}
+
+/* Primary button hover effect */
+.btn-primary:hover {
+    background-color: var(--color-primary-hover);
+    transform: translateY(-2px);  /* Lift effect */
+    box-shadow: var(--shadow-lg);
+}
+
+/* Primary button click effect */
+.btn-primary:active {
+    transform: translateY(0);  /* Remove lift on click */
+}
+
+/* Secondary button (Dark Grey) */
+.btn-secondary {
+    background-color: var(--color-secondary);
+    color: white;
+}
+
+.btn-secondary:hover {
+    background-color: var(--color-secondary-light);
+}
+
+/* Outline button (bordered) */
+.btn-outline {
+    background-color: transparent;
+    border: 2px solid var(--color-primary);
+    color: var(--color-primary);
+}
+
+.btn-outline:hover {
+    background-color: var(--color-primary);
+    color: white;
+}
+
+/* Large button variant */
+.btn-lg {
+    padding: var(--spacing-md) var(--spacing-xl);
+    font-size: 1.1rem;
+    border-radius: var(--radius-xl);
+}
+
+/* Disabled button state */
+.btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none;  /* No hover effects when disabled */
+}
+
+/* ============================================
+   UPLOAD ZONE
+   ============================================
+   
+   The drag-and-drop file upload area on the home page.
+   Has a dashed border and changes color on drag-over.
+*/
+
+.upload-zone {
+    border: 3px dashed var(--color-border);
+    border-radius: var(--radius-xl);
+    padding: var(--spacing-2xl);
+    text-align: center;
+    transition: all var(--transition-normal);
+    cursor: pointer;
+    background-color: var(--color-bg-light);
+}
+
+/* Hover state */
+.upload-zone:hover,
+.upload-zone.drag-over {
+    border-color: var(--color-primary);
+    background-color: var(--color-primary-light);
+}
+
+/* When file is being dragged over */
+.upload-zone.drag-over {
+    transform: scale(1.02);  /* Slight grow effect */
+}
+
+/* Upload icon styling */
+.upload-icon {
+    width: 80px;
+    height: 80px;
+    margin: 0 auto var(--spacing-lg);
+    color: var(--color-primary);
+}
+
+/* ============================================
+   READER LAYOUT
+   ============================================
+   
+   The split-screen reader interface.
+   Uses CSS Grid to create two equal columns.
+   Left side: Text content (scrollable)
+   Right side: Manga panel (sticky/fixed)
+*/
+
+/* Main container: two-column grid */
+.reader-container {
+    display: grid;
+    grid-template-columns: 1fr 1fr;  /* Two equal columns */
+    height: 100vh;                    /* Full viewport height */
+    overflow: hidden;                 /* Prevent body scroll */
+}
+
+/* ---- LEFT PANEL (Text) ---- */
+.text-panel {
+    display: flex;
+    flex-direction: column;  /* Stack header, content, nav vertically */
+    background-color: var(--color-bg-white);
+    border-right: 1px solid var(--color-border);
+    overflow: hidden;
+}
+
+/* Text panel header (book title, back button) */
+.text-panel-header {
+    padding: var(--spacing-md) var(--spacing-lg);
+    background-color: var(--color-bg-light);
+    border-bottom: 1px solid var(--color-border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+/* Scrollable text content area */
+.text-content {
+    flex: 1;  /* Take remaining space */
+    padding: var(--spacing-xl);
+    overflow-y: auto;  /* Enable vertical scrolling */
+    font-size: 1.1rem;
+    line-height: 1.8;  /* Extra spacing for readability */
+}
+
+/* Custom scrollbar styling (WebKit browsers) */
+.text-content::-webkit-scrollbar {
+    width: 8px;
+}
+
+.text-content::-webkit-scrollbar-track {
+    background: var(--color-bg-light);
+}
+
+.text-content::-webkit-scrollbar-thumb {
+    background: var(--color-border);
+    border-radius: var(--radius-full);
+}
+
+.text-content::-webkit-scrollbar-thumb:hover {
+    background: var(--color-text-light);
+}
+
+/* ---- RIGHT PANEL (Manga) ---- */
+.manga-panel {
+    display: flex;
+    flex-direction: column;
+    background-color: var(--color-bg-dark);  /* Dark background */
+    position: sticky;
+    top: 0;
+    height: 100vh;
+}
+
+/* Manga panel header */
+.manga-panel-header {
+    padding: var(--spacing-md) var(--spacing-lg);
+    background-color: rgba(0, 0, 0, 0.3);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+/* Image display area */
+.manga-display {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: var(--spacing-lg);
+    overflow: hidden;
+}
+
+/* Generated manga image */
+.manga-display img {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;  /* Maintain aspect ratio */
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-xl);
+}
+
+/* Placeholder when no image generated */
+.manga-placeholder {
+    text-align: center;
+    color: var(--color-text-light);
+}
+
+.manga-placeholder svg {
+    width: 120px;
+    height: 120px;
+    margin-bottom: var(--spacing-lg);
+    opacity: 0.3;
+}
+
+/* Navigation controls bar */
+.nav-controls {
+    padding: var(--spacing-md) var(--spacing-lg);
+    background-color: var(--color-bg-light);
+    border-top: 1px solid var(--color-border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--spacing-md);
+}
+
+/* Page number indicator */
+.page-indicator {
+    font-weight: 600;
+    color: var(--color-secondary);
+    font-variant-numeric: tabular-nums;  /* Fixed-width numbers */
+}
+
+/* ============================================
+   LOADING STATES
+   ============================================
+   
+   Loading spinner and overlay animations.
+*/
+
+/* Spinning circle loader */
+.loading-spinner {
+    width: 48px;
+    height: 48px;
+    border: 4px solid var(--color-border);
+    border-top-color: var(--color-primary);  /* Green top segment */
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+/* Spin animation */
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+/* Full-screen loading overlay */
+.loading-overlay {
+    position: fixed;
+    inset: 0;  /* Cover entire viewport */
+    background-color: rgba(255, 255, 255, 0.9);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: var(--spacing-lg);
+    z-index: 1000;  /* Above everything */
+    
+    /* Hidden by default */
+    opacity: 0;
+    visibility: hidden;
+    transition: all var(--transition-normal);
+}
+
+/* Show overlay when .active class added */
+.loading-overlay.active {
+    opacity: 1;
+    visibility: visible;
+}
+
+/* ============================================
+   INDEX PAGE (Home/Upload)
+   ============================================
+   
+   Specific styles for the upload page.
+*/
+
+.index-container {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: var(--spacing-xl);
+    /* Subtle gradient background */
+    background: linear-gradient(135deg, var(--color-bg-white) 0%, var(--color-bg-light) 100%);
+}
+
+/* Logo section */
+.logo {
+    margin-bottom: var(--spacing-xl);
+}
+
+.logo-text {
+    font-family: var(--font-header);
+    font-size: 3rem;
+    font-weight: 700;
+    color: var(--color-secondary);
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+}
+
+/* "Mangaka" in green */
+.logo-text span {
+    color: var(--color-primary);
+}
+
+/* Tagline under logo */
+.tagline {
+    color: var(--color-text-secondary);
+    font-size: 1.2rem;
+    margin-bottom: var(--spacing-2xl);
+    text-align: center;
+}
+
+/* Upload card container */
+.upload-card {
+    background: white;
+    border-radius: var(--radius-xl);
+    padding: var(--spacing-2xl);
+    box-shadow: var(--shadow-lg);
+    max-width: 500px;
+    width: 100%;
+}
+
+/* ============================================
+   STORY BIBLE DISPLAY
+   ============================================
+   
+   Panel showing AI's understanding of the scene.
+*/
+
+.story-bible-panel {
+    background: var(--color-bg-light);
+    border-radius: var(--radius-md);
+    padding: var(--spacing-md);
+    margin-top: var(--spacing-md);
+    font-size: 0.85rem;
+}
+
+.story-bible-panel h4 {
+    font-size: 0.9rem;
+    color: var(--color-primary);
+    margin-bottom: var(--spacing-sm);
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-xs);
+}
+
+.story-bible-content {
+    color: var(--color-text-secondary);
+}
+
+/* Character name tags */
+.character-tag {
+    display: inline-block;
+    background: var(--color-primary-light);
+    color: var(--color-primary-hover);
+    padding: 2px 8px;
+    border-radius: var(--radius-full);
+    font-size: 0.75rem;
+    font-weight: 500;
+    margin-right: var(--spacing-xs);
+    margin-bottom: var(--spacing-xs);
+}
+
+/* ============================================
+   ANIMATIONS
+   ============================================
+   
+   Reusable animation keyframes.
+*/
+
+/* Fade in with upward motion */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* Slide in from left */
+@keyframes slideIn {
+    from { opacity: 0; transform: translateX(-20px); }
+    to { opacity: 1; transform: translateX(0); }
+}
+
+/* Pulsing effect */
+@keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
+}
+
+/* Animation utility classes */
+.fade-in {
+    animation: fadeIn var(--transition-slow) ease forwards;
+}
+
+.slide-in {
+    animation: slideIn var(--transition-slow) ease forwards;
+}
+
+/* ============================================
+   RESPONSIVE DESIGN
+   ============================================
+   
+   Adjust layout for smaller screens.
+   @media queries apply styles when conditions are met.
+*/
+
+/* Tablet and smaller (below 1024px) */
+@media (max-width: 1024px) {
+    /* Stack panels vertically instead of side-by-side */
+    .reader-container {
+        grid-template-columns: 1fr;      /* Single column */
+        grid-template-rows: 1fr 1fr;     /* Two equal rows */
+    }
+    
+    .manga-panel {
+        position: relative;  /* Remove sticky */
+        height: 50vh;        /* Half screen height */
+    }
+    
+    .text-panel {
+        border-right: none;
+        border-bottom: 1px solid var(--color-border);
+    }
+}
+
+/* Mobile (below 640px) */
+@media (max-width: 640px) {
+    /* Smaller typography */
+    h1 { font-size: 2rem; }
+    
+    .logo-text {
+        font-size: 2rem;
+    }
+    
+    .upload-card {
+        padding: var(--spacing-lg);
+    }
+    
+    .text-content {
+        padding: var(--spacing-md);
+        font-size: 1rem;
+    }
+}
+
+/* ============================================
+   UTILITY CLASSES
+   ============================================
+   
+   Small, reusable classes for common styles.
+   Similar to Tailwind CSS utilities.
+*/
+
+/* Text alignment */
+.text-center { text-align: center; }
+.text-left { text-align: left; }
+.text-right { text-align: right; }
+
+/* Text colors */
+.text-primary { color: var(--color-primary); }
+.text-secondary { color: var(--color-text-secondary); }
+.text-light { color: var(--color-text-light); }
+
+/* Background colors */
+.bg-primary { background-color: var(--color-primary); }
+.bg-light { background-color: var(--color-bg-light); }
+.bg-dark { background-color: var(--color-bg-dark); }
+
+/* Margin utilities */
+.mt-sm { margin-top: var(--spacing-sm); }
+.mt-md { margin-top: var(--spacing-md); }
+.mt-lg { margin-top: var(--spacing-lg); }
+.mb-sm { margin-bottom: var(--spacing-sm); }
+.mb-md { margin-bottom: var(--spacing-md); }
+.mb-lg { margin-bottom: var(--spacing-lg); }
+
+/* Display utilities */
+.hidden { display: none; }
+.visible { display: block; }
+
+/* Flexbox utilities */
+.flex { display: flex; }
+.flex-center { 
+    display: flex; 
+    align-items: center; 
+    justify-content: center; 
+}
+.flex-between {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}

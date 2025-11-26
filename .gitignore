@@ -1,0 +1,77 @@
+# ========================================
+# MyMangaka .gitignore
+# This file tells Git which files to ignore
+# and NOT upload to GitHub
+# ========================================
+
+# ----------------------------------------
+# SECURITY: Environment variables
+# CRITICAL: Never commit API keys to Git!
+# ----------------------------------------
+.env
+.env.local
+.env.production
+.env*.local
+
+# ----------------------------------------
+# Python compiled files
+# These are auto-generated, no need to track
+# ----------------------------------------
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# ----------------------------------------
+# Virtual environment
+# Each developer creates their own
+# ----------------------------------------
+venv/
+env/
+.venv/
+ENV/
+
+# ----------------------------------------
+# IDE settings
+# Personal editor preferences
+# ----------------------------------------
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# ----------------------------------------
+# Uploaded files
+# User uploads shouldn't be in git
+# ----------------------------------------
+uploads/
+*.pdf
+
+# ----------------------------------------
+# OS generated files
+# ----------------------------------------
+.DS_Store
+.DS_Store?
+Thumbs.db
+
+# ----------------------------------------
+# Python distribution / packaging
+# ----------------------------------------
+dist/
+build/
+*.egg-info/
+*.egg
+
+# ----------------------------------------
+# Testing and coverage
+# ----------------------------------------
+.pytest_cache/
+.coverage
+htmlcov/
+
+# ----------------------------------------
+# Vercel
+# ----------------------------------------
+.vercel
+
