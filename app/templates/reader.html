@@ -625,17 +625,26 @@ KEYBOARD SHORTCUTS:
         // ========================================
         // KEYBOARD NAVIGATION
         // ========================================
+        // Shortcuts:
+        // - Arrow Left or A: Previous page
+        // - Arrow Right or D: Next page
+        // - G or W: Generate manga panel
         document.addEventListener('keydown', (e) => {
-            // Left arrow → Previous page
-            if (e.key === 'ArrowLeft' && !prevBtn.disabled) {
+            // Don't trigger if user is typing in an input field
+            if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') {
+                return;
+            }
+            
+            // Left arrow or A → Previous page
+            if ((e.key === 'ArrowLeft' || e.key === 'a' || e.key === 'A') && !prevBtn.disabled) {
                 loadPageText(currentPage - 1);
             } 
-            // Right arrow → Next page
-            else if (e.key === 'ArrowRight' && !nextBtn.disabled) {
+            // Right arrow or D → Next page
+            else if ((e.key === 'ArrowRight' || e.key === 'd' || e.key === 'D') && !nextBtn.disabled) {
                 loadPageText(currentPage + 1);
             } 
-            // G key → Generate panel
-            else if (e.key === 'g' && !isGenerating) {
+            // G or W key → Generate panel
+            else if ((e.key === 'g' || e.key === 'G' || e.key === 'w' || e.key === 'W') && !isGenerating) {
                 generatePanel();
             }
         });

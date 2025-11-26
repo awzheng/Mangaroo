@@ -1,10 +1,29 @@
-fastapi==0.109.2
-uvicorn[standard]==0.27.1
-python-multipart==0.0.9
-jinja2==3.1.3
-pymupdf==1.23.26
-google-generativeai==0.4.1
-pydantic-settings==2.2.1
-python-dotenv==1.0.1
-aiofiles==23.2.1
+# ========================================
+# MyMangaka Dependencies
+# ========================================
+# Run: pip install -r requirements.txt
 
+# Web Framework
+fastapi==0.115.0
+uvicorn[standard]==0.30.6
+
+# File Upload Support
+python-multipart==0.0.9
+
+# HTML Templates
+jinja2==3.1.4
+
+# PDF Processing - using newer version with pre-built wheels
+pymupdf==1.24.10
+
+# Google AI (Gemini + Imagen)
+google-generativeai==0.8.3
+
+# Settings Management
+pydantic-settings==2.5.2
+
+# Environment Variables
+python-dotenv==1.0.1
+
+# Async File Operations
+aiofiles==24.1.0
