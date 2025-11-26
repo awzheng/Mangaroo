@@ -86,14 +86,23 @@ BASE_DIR = Path(__file__).resolve().parent
 # Mount static files (CSS, JavaScript, images)
 # This makes files in /static accessible via /static URL
 # Example: /static/css/styles.css serves app/static/css/styles.css
-app.mount("/static", StaticFiles(directory=BASE_DIR / "static"), name="static")
+app.mount("/static", StaticFiles(directory=str(BASE_DIR / "static")), name="static")
 
 # Set up Jinja2 templates for rendering HTML
 # Templates are HTML files with dynamic content
-templates = Jinja2Templates(directory=BASE_DIR / "templates")
+templates = Jinja2Templates(directory=str(BASE_DIR / "templates"))
 
-# Make sure the upload folder exists
-ensure_upload_dir()
+# Make sure the upload folder exists (use /tmp on Vercel)
+# Vercel's serverless functions only allow writes to /tmp
+import tempfile
+UPLOAD_DIR = os.environ.get("VERCEL", None)
+if UPLOAD_DIR:
+    # Running on Vercel - use temp directory
+    UPLOAD_DIR = tempfile.gettempdir()
+else:
+    # Running locally - use uploads folder
+    UPLOAD_DIR = str(Path(get_settings().upload_dir).resolve())
+    os.makedirs(UPLOAD_DIR, exist_ok=True)
 
 
 # ========================================
@@ -291,7 +300,7 @@ async def upload_pdf(file: UploadFile = File(...)):
     # ---- Step 4: Save the file ----
     # Add session_id to filename to make it unique
     safe_filename = f"{session_id}_{file.filename}"
-    file_path = Path(settings.upload_dir) / safe_filename
+    file_path = Path(UPLOAD_DIR) / safe_filename
     
     # Write the file to disk
     with open(file_path, "wb") as f:  # "wb" = write binary
@@ -538,7 +547,7 @@ async def startup_event():
     - Setting up database connections
     - Loading models
     """
-    ensure_upload_dir()  # Make sure uploads folder exists
+    # Upload directory is already set up in the global scope
     print("🎨 MyMangaka is ready!")
     print("📚 Upload a PDF novel to transform it into manga")
 
