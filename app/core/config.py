@@ -1,6 +1,6 @@
 """
 ========================================
-Configuration Module for MyMangaka
+Configuration Module for Mangaroo
 ========================================
 
 This file handles loading settings from environment variables.
@@ -57,7 +57,7 @@ class Settings(BaseSettings):
     
     # ---- App Configuration ----
     # The name of our application
-    app_name: str = "MyMangaka"
+    app_name: str = "Mangaroo"
     
     # Debug mode: when True, shows more detailed error messages
     # Set to False in production for security

@@ -1,6 +1,6 @@
 """
 ========================================
-Image Generation Module for MyMangaka
+Image Generation Module for Mangaroo
 ========================================
 
 This file handles creating manga-style images using Google's Imagen 3 AI.

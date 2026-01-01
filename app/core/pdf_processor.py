@@ -1,6 +1,6 @@
 """
 ========================================
-PDF Processing Module for MyMangaka
+PDF Processing Module for Mangaroo
 ========================================
 
 This file handles everything related to reading PDF files.

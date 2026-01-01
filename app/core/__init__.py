@@ -1,2 +1,2 @@
-# Core modules for MyMangaka
+# Core modules for Mangaroo
 

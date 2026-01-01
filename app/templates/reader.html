@@ -1,6 +1,6 @@
 <!--
 ========================================
-MyMangaka - Reader Page (reader.html)
+Mangaroo - Reader Page (reader.html)
 ========================================
 
 This is the main reading interface - the heart of the app!
@@ -27,12 +27,13 @@ KEYBOARD SHORTCUTS:
 -->
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <!-- Title shows the book being read -->
     <title>{{ title }}</title>
-    
+
     <!-- 
     ========================================
     FONTS & STYLES
@@ -41,13 +42,13 @@ KEYBOARD SHORTCUTS:
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    
+
     <!-- TailwindCSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    
+
     <!-- Custom styles -->
     <link rel="stylesheet" href="/static/css/styles.css">
-    
+
     <!-- Tailwind config with our custom colors -->
     <script>
         tailwind.config = {
@@ -71,7 +72,7 @@ KEYBOARD SHORTCUTS:
             }
         }
     </script>
-    
+
     <!-- 
     ========================================
     READER-SPECIFIC STYLES
@@ -82,65 +83,79 @@ KEYBOARD SHORTCUTS:
         /* Text content styling for readability */
         .prose-content {
             font-size: 1.125rem;
-            line-height: 1.875;          /* Extra line height for easy reading */
-            white-space: pre-wrap;       /* Preserve formatting */
+            line-height: 1.875;
+            /* Extra line height for easy reading */
+            white-space: pre-wrap;
+            /* Preserve formatting */
             word-wrap: break-word;
         }
-        
+
         /* Paragraph indentation (like a real book) */
         .prose-content p {
             margin-bottom: 1.25rem;
-            text-indent: 1.5rem;         /* Indent first line */
+            text-indent: 1.5rem;
+            /* Indent first line */
         }
-        
+
         /* Don't indent the very first paragraph */
         .prose-content p:first-child {
             text-indent: 0;
         }
-        
+
         /* Frame around manga images */
         .manga-frame {
             background: linear-gradient(145deg, #1a1a1a 0%, #0d0d0d 100%);
             border: 3px solid #2a2a2a;
             border-radius: 8px;
             padding: 8px;
-            box-shadow: 
+            box-shadow:
                 0 4px 6px rgba(0, 0, 0, 0.3),
                 inset 0 1px 0 rgba(255, 255, 255, 0.05);
         }
-        
+
         /* Shimmer animation for loading state */
         .generating-animation {
-            background: linear-gradient(
-                90deg,
-                transparent 0%,
-                rgba(96, 208, 113, 0.1) 50%,
-                transparent 100%
-            );
+            background: linear-gradient(90deg,
+                    transparent 0%,
+                    rgba(96, 208, 113, 0.1) 50%,
+                    transparent 100%);
             background-size: 200% 100%;
             animation: shimmer 1.5s infinite;
         }
-        
+
         @keyframes shimmer {
-            0% { background-position: -200% 0; }
-            100% { background-position: 200% 0; }
+            0% {
+                background-position: -200% 0;
+            }
+
+            100% {
+                background-position: 200% 0;
+            }
         }
-        
+
         /* Page turn animation */
         .page-turn-animation {
             animation: pageTurn 0.4s ease-out;
         }
-        
+
         @keyframes pageTurn {
-            0% { opacity: 0; transform: translateX(20px); }
-            100% { opacity: 1; transform: translateX(0); }
+            0% {
+                opacity: 0;
+                transform: translateX(20px);
+            }
+
+            100% {
+                opacity: 1;
+                transform: translateX(0);
+            }
         }
     </style>
 </head>
 
 <!-- overflow-hidden prevents the whole page from scrolling -->
+
 <body class="bg-white font-inter overflow-hidden">
-    
+
     <!-- 
     ========================================
     READER CONTAINER (Split Screen)
@@ -148,7 +163,7 @@ KEYBOARD SHORTCUTS:
     Uses CSS Grid to create two equal columns
     -->
     <div class="reader-container">
-        
+
         <!-- 
         ========================================
         LEFT PANEL - NOVEL TEXT
@@ -156,7 +171,7 @@ KEYBOARD SHORTCUTS:
         This is where the story text appears
         -->
         <div class="text-panel">
-            
+
             <!-- 
             HEADER BAR
             Shows book info and navigation
@@ -166,7 +181,8 @@ KEYBOARD SHORTCUTS:
                     <!-- Back to home button -->
                     <a href="/" class="text-gray-400 hover:text-webtoon-green transition-colors">
                         <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M10 19l-7-7m0 0l7-7m-7 7h18" />
                         </svg>
                     </a>
                     <!-- Book title and author -->
@@ -181,14 +197,16 @@ KEYBOARD SHORTCUTS:
                 </div>
                 <!-- Story Bible toggle button -->
                 <div class="flex items-center gap-2">
-                    <button id="storyBibleToggle" class="p-2 text-gray-400 hover:text-webtoon-green transition-colors" title="Story Bible">
+                    <button id="storyBibleToggle" class="p-2 text-gray-400 hover:text-webtoon-green transition-colors"
+                        title="Story Bible">
                         <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                         </svg>
                     </button>
                 </div>
             </div>
-            
+
             <!-- 
             TEXT CONTENT AREA
             This is where the actual story text goes
@@ -199,7 +217,7 @@ KEYBOARD SHORTCUTS:
                 <div id="textDisplay" class="prose-content">
                     <p class="text-gray-400 text-center">Loading page content...</p>
                 </div>
-                
+
                 <!-- 
                 STORY BIBLE PANEL
                 Shows AI's understanding of the current scene
@@ -208,7 +226,8 @@ KEYBOARD SHORTCUTS:
                 <div id="storyBiblePanel" class="story-bible-panel hidden mt-8">
                     <h4>
                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                         </svg>
                         Story Context
                     </h4>
@@ -217,7 +236,7 @@ KEYBOARD SHORTCUTS:
                     </div>
                 </div>
             </div>
-            
+
             <!-- 
             NAVIGATION CONTROLS
             Previous/Next buttons and page indicator
@@ -230,12 +249,12 @@ KEYBOARD SHORTCUTS:
                     </svg>
                     Previous
                 </button>
-                
+
                 <!-- Page indicator: "Page X of Y" -->
                 <div class="page-indicator">
                     Page <span id="currentPage">1</span> of <span id="totalPages">{{ total_pages }}</span>
                 </div>
-                
+
                 <!-- 
                 NEXT PAGE BUTTON
                 Green (#60D071) with rounded corners per design spec
@@ -248,7 +267,7 @@ KEYBOARD SHORTCUTS:
                 </button>
             </div>
         </div>
-        
+
         <!-- 
         ========================================
         RIGHT PANEL - MANGA DISPLAY
@@ -257,24 +276,26 @@ KEYBOARD SHORTCUTS:
         Sticky position keeps it visible while scrolling
         -->
         <div class="manga-panel">
-            
+
             <!-- HEADER with title and generate button -->
             <div class="manga-panel-header">
                 <h3 class="font-semibold text-sm flex items-center gap-2">
                     <svg class="w-5 h-5 text-webtoon-green" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                     </svg>
                     Manga Panel
                 </h3>
                 <!-- Generate button - triggers AI image generation -->
                 <button id="generateBtn" class="btn btn-primary text-sm py-1 px-3">
                     <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M13 10V3L4 14h7v7l9-11h-7z" />
                     </svg>
                     Generate
                 </button>
             </div>
-            
+
             <!-- 
             MANGA DISPLAY AREA
             Contains three states:
@@ -283,7 +304,7 @@ KEYBOARD SHORTCUTS:
             3. Image (after generation)
             -->
             <div class="manga-display" id="mangaDisplay">
-                
+
                 <!-- 
                 PLACEHOLDER STATE
                 Shown when no image has been generated yet
@@ -291,16 +312,18 @@ KEYBOARD SHORTCUTS:
                 <div class="manga-placeholder" id="mangaPlaceholder">
                     <svg viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
                         <!-- Dashed rectangle representing empty panel -->
-                        <rect x="10" y="10" width="100" height="100" rx="8" stroke="currentColor" stroke-width="2" stroke-dasharray="6 4"/>
+                        <rect x="10" y="10" width="100" height="100" rx="8" stroke="currentColor" stroke-width="2"
+                            stroke-dasharray="6 4" />
                         <!-- Simple landscape shapes -->
-                        <path d="M35 75L50 55L65 70L80 50L95 75" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M35 75L50 55L65 70L80 50L95 75" stroke="currentColor" stroke-width="2"
+                            stroke-linecap="round" stroke-linejoin="round" />
                         <!-- Sun circle -->
-                        <circle cx="45" cy="40" r="8" stroke="currentColor" stroke-width="2"/>
+                        <circle cx="45" cy="40" r="8" stroke="currentColor" stroke-width="2" />
                     </svg>
                     <p class="text-lg font-medium">No panel generated yet</p>
                     <p class="text-sm mt-2">Click "Generate" to create a manga panel<br>for the current page</p>
                 </div>
-                
+
                 <!-- 
                 IMAGE CONTAINER
                 Shows the actual generated manga image
@@ -309,7 +332,7 @@ KEYBOARD SHORTCUTS:
                 <div id="mangaImageContainer" class="hidden manga-frame">
                     <img id="mangaImage" src="" alt="Generated manga panel" class="rounded">
                 </div>
-                
+
                 <!-- 
                 LOADING STATE
                 Shown while AI is generating the image
@@ -324,7 +347,7 @@ KEYBOARD SHORTCUTS:
                     </div>
                 </div>
             </div>
-            
+
             <!-- 
             PROMPT DISPLAY
             Shows what prompt was sent to the AI
@@ -338,7 +361,7 @@ KEYBOARD SHORTCUTS:
             </div>
         </div>
     </div>
-    
+
     <!-- 
     ========================================
     TOAST NOTIFICATION
@@ -346,7 +369,8 @@ KEYBOARD SHORTCUTS:
     Small popup message for feedback
     (e.g., "Panel generated successfully!")
     -->
-    <div id="toast" class="fixed bottom-4 right-4 bg-manga-dark text-white px-4 py-3 rounded-lg shadow-lg transform translate-y-full opacity-0 transition-all duration-300 z-50">
+    <div id="toast"
+        class="fixed bottom-4 right-4 bg-manga-dark text-white px-4 py-3 rounded-lg shadow-lg transform translate-y-full opacity-0 transition-all duration-300 z-50">
         <p id="toastMessage"></p>
     </div>
 
@@ -364,11 +388,11 @@ KEYBOARD SHORTCUTS:
         // They're set in main.py when rendering this page
         const sessionId = '{{ session_id }}';    // Unique ID for this reading session
         const totalPages = {{ total_pages }};    // How many pages in the PDF
-        
+
         // Track current state
         let currentPage = 0;        // Which page we're on (0-indexed)
         let isGenerating = false;   // Prevent multiple simultaneous generations
-        
+
         // ========================================
         // DOM ELEMENT REFERENCES
         // ========================================
@@ -386,11 +410,11 @@ KEYBOARD SHORTCUTS:
         const storyBibleContent = document.getElementById('storyBibleContent');
         const promptDisplay = document.getElementById('promptDisplay');
         const promptText = document.getElementById('promptText');
-        
+
         // ========================================
         // TOAST NOTIFICATION
         // ========================================
-        
+
         /**
          * Show a toast notification message
          * @param {string} message - The message to display
@@ -399,21 +423,21 @@ KEYBOARD SHORTCUTS:
         function showToast(message, duration = 3000) {
             const toast = document.getElementById('toast');
             const toastMessage = document.getElementById('toastMessage');
-            
+
             // Set message and show toast
             toastMessage.textContent = message;
             toast.classList.remove('translate-y-full', 'opacity-0');
-            
+
             // Hide after duration
             setTimeout(() => {
                 toast.classList.add('translate-y-full', 'opacity-0');
             }, duration);
         }
-        
+
         // ========================================
         // PAGE TEXT LOADING
         // ========================================
-        
+
         /**
          * Load text content for a specific page
          * Called when navigating between pages
@@ -424,33 +448,33 @@ KEYBOARD SHORTCUTS:
                 // Fetch page text from API
                 const response = await fetch(`/api/get_page_text?session_id=${sessionId}&page=${page}`);
                 const data = await response.json();
-                
+
                 if (data.success) {
                     // Format text into paragraphs
                     // Split on double newlines (paragraph breaks)
                     const paragraphs = data.text.split('\n\n').filter(p => p.trim());
                     const formattedText = paragraphs.map(p => `<p>${p.trim()}</p>`).join('');
-                    
+
                     // Insert text with fallback for empty pages
                     textDisplay.innerHTML = formattedText || '<p class="text-gray-400 text-center">This page appears to be empty.</p>';
-                    
+
                     // Add page turn animation
                     textDisplay.classList.add('page-turn-animation');
                     setTimeout(() => {
                         textDisplay.classList.remove('page-turn-animation');
                     }, 400);
-                    
+
                     // Update state
                     currentPage = page;
                     currentPageSpan.textContent = page + 1;  // Display as 1-indexed
-                    
+
                     // Update navigation buttons
                     prevBtn.disabled = !data.has_prev;
                     nextBtn.disabled = !data.has_next;
-                    
+
                     // Scroll text panel to top
                     document.getElementById('textContent').scrollTop = 0;
-                    
+
                     // Reset manga panel for new page
                     resetMangaPanel();
                 } else {
@@ -461,11 +485,11 @@ KEYBOARD SHORTCUTS:
                 showToast('Error loading page');
             }
         }
-        
+
         // ========================================
         // MANGA PANEL MANAGEMENT
         // ========================================
-        
+
         /**
          * Reset manga panel to initial state
          * Called when navigating to a new page
@@ -476,7 +500,7 @@ KEYBOARD SHORTCUTS:
             mangaLoading.classList.add('hidden');
             promptDisplay.classList.add('hidden');
         }
-        
+
         /**
          * Generate a manga panel for the current page
          * This calls the AI to create an image!
@@ -484,56 +508,56 @@ KEYBOARD SHORTCUTS:
         async function generatePanel() {
             // Prevent multiple simultaneous generations
             if (isGenerating) return;
-            
+
             isGenerating = true;
             generateBtn.disabled = true;
-            
+
             // Show loading state
             mangaPlaceholder.classList.add('hidden');
             mangaImageContainer.classList.add('hidden');
             mangaLoading.classList.remove('hidden');
-            
+
             try {
                 // Prepare form data for the API
                 const formData = new FormData();
                 formData.append('session_id', sessionId);
                 formData.append('page', currentPage);
-                
+
                 // Call the generate API
                 const response = await fetch('/api/generate_panel', {
                     method: 'POST',
                     body: formData
                 });
-                
+
                 const data = await response.json();
-                
+
                 if (data.success && data.image_data) {
                     // SUCCESS! Display the generated image
                     // image_data is base64 encoded, so we create a data URL
                     mangaImage.src = `data:image/png;base64,${data.image_data}`;
                     mangaLoading.classList.add('hidden');
                     mangaImageContainer.classList.remove('hidden');
-                    
+
                     // Show the prompt that was used
                     if (data.prompt_used) {
                         promptText.textContent = data.prompt_used;
                         promptDisplay.classList.remove('hidden');
                     }
-                    
+
                     // Update story bible display
                     if (data.story_state) {
                         updateStoryBibleDisplay(data.story_state);
                     }
-                    
+
                     showToast('Panel generated successfully!');
                 } else {
                     // Generation failed - show error
                     mangaLoading.classList.add('hidden');
                     mangaPlaceholder.classList.remove('hidden');
-                    
+
                     const errorMsg = data.error || 'Failed to generate panel';
                     showToast(errorMsg);
-                    
+
                     // Still update story bible if we got state back
                     if (data.story_state) {
                         updateStoryBibleDisplay(data.story_state);
@@ -550,23 +574,23 @@ KEYBOARD SHORTCUTS:
                 generateBtn.disabled = false;
             }
         }
-        
+
         // ========================================
         // STORY BIBLE DISPLAY
         // ========================================
-        
+
         /**
          * Update the Story Bible panel with current state
          * @param {Object} state - Story state from the API
          */
         function updateStoryBibleDisplay(state) {
             let html = '';
-            
+
             // Current scene
             if (state.current_scene) {
                 html += `<p class="mb-2"><strong>Scene:</strong> ${state.current_scene}</p>`;
             }
-            
+
             // Characters (as tags)
             if (state.characters && state.characters.length > 0) {
                 html += '<div class="mb-2"><strong>Characters:</strong> ';
@@ -576,52 +600,52 @@ KEYBOARD SHORTCUTS:
                 });
                 html += '</div>';
             }
-            
+
             // Mood
             if (state.mood) {
                 html += `<p class="mb-2"><strong>Mood:</strong> ${state.mood}</p>`;
             }
-            
+
             // Location
             if (state.location_details) {
                 html += `<p class="mb-2"><strong>Location:</strong> ${state.location_details}</p>`;
             }
-            
+
             // Visual style
             if (state.visual_style) {
                 html += `<p><strong>Style:</strong> ${state.visual_style}</p>`;
             }
-            
+
             storyBibleContent.innerHTML = html || '<p>No context available.</p>';
         }
-        
+
         // ========================================
         // EVENT LISTENERS
         // ========================================
-        
+
         // Previous page button
         prevBtn.addEventListener('click', () => {
             if (currentPage > 0) {
                 loadPageText(currentPage - 1);
             }
         });
-        
+
         // Next page button
         nextBtn.addEventListener('click', () => {
             if (currentPage < totalPages - 1) {
                 loadPageText(currentPage + 1);
             }
         });
-        
+
         // Generate button
         generateBtn.addEventListener('click', generatePanel);
-        
+
         // Story Bible toggle
         storyBibleToggle.addEventListener('click', () => {
             storyBiblePanel.classList.toggle('hidden');
             storyBibleToggle.classList.toggle('text-webtoon-green');
         });
-        
+
         // ========================================
         // KEYBOARD NAVIGATION
         // ========================================
@@ -634,21 +658,21 @@ KEYBOARD SHORTCUTS:
             if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') {
                 return;
             }
-            
+
             // Left arrow or A → Previous page
             if ((e.key === 'ArrowLeft' || e.key === 'a' || e.key === 'A') && !prevBtn.disabled) {
                 loadPageText(currentPage - 1);
-            } 
+            }
             // Right arrow or D → Next page
             else if ((e.key === 'ArrowRight' || e.key === 'd' || e.key === 'D') && !nextBtn.disabled) {
                 loadPageText(currentPage + 1);
-            } 
+            }
             // G or W key → Generate panel
             else if ((e.key === 'g' || e.key === 'G' || e.key === 'w' || e.key === 'W') && !isGenerating) {
                 generatePanel();
             }
         });
-        
+
         // ========================================
         // INITIALIZATION
         // ========================================
@@ -656,4 +680,5 @@ KEYBOARD SHORTCUTS:
         loadPageText(0);
     </script>
 </body>
+
 </html>

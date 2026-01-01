@@ -1,4 +1,4 @@
-# MyMangaka 📚✨
+# Mangaroo 📚✨
 
 > AI-Powered Smart Reader - Transform your novels into stunning manga illustrations
 
@@ -8,7 +8,7 @@
 
 ## Overview
 
-MyMangaka is an AI-powered web application that transforms PDF novels into manga-style visual experiences. It reads your novel page-by-page and generates beautiful manga illustrations that maintain visual continuity throughout your story.
+Mangaroo is an AI-powered web application that transforms PDF novels into manga-style visual experiences. It reads your novel page-by-page and generates beautiful manga illustrations that maintain visual continuity throughout your story.
 
 ### Key Features
 
@@ -36,8 +36,8 @@ MyMangaka is an AI-powered web application that transforms PDF novels into manga
 
 1. **Clone the repository**
    ```bash
-   git clone https://github.com/yourusername/MyMangaka.git
-   cd MyMangaka
+   git clone https://github.com/awzheng/Mangaroo.git
+   cd Mangaroo
    ```
 
 2. **Create a virtual environment**
@@ -79,7 +79,7 @@ MyMangaka is an AI-powered web application that transforms PDF novels into manga
 ## Project Structure
 
 ```
-MyMangaka/
+Mangaroo/
 ├── app/
 │   ├── __init__.py
 │   ├── main.py              # FastAPI application entry point
@@ -158,5 +158,5 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 
 ---
 
-Made with ❤️ by the MyMangaka team
+Made with ❤️ by the Mangaroo team
 

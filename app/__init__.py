@@ -1,2 +1,2 @@
-# MyMangaka - AI-Powered Smart Reader
+# Mangaroo - AI-Powered Smart Reader
 

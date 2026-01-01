@@ -1,6 +1,6 @@
 """
 ========================================
-MyMangaka - Main Application Entry Point
+Mangaroo - Main Application Entry Point
 ========================================
 
 This is the MAIN file that runs the web application.
@@ -72,7 +72,7 @@ from app.core.image_gen import get_image_generator
 # Create the FastAPI application instance
 # This is the central object that handles everything
 app = FastAPI(
-    title="MyMangaka",                                    # App name (shown in docs)
+    title="Mangaroo",                                    # App name (shown in docs)
     description="AI-Powered Smart Reader - Transform novels into manga",
     version="1.0.0"
 )
@@ -192,7 +192,7 @@ async def index(request: Request):
     # We pass variables that the template can use
     return templates.TemplateResponse(
         "index.html",                                    # Which template to render
-        {"request": request, "title": "MyMangaka - Upload Your Novel"}  # Data for template
+        {"request": request, "title": "Mangaroo - Upload Your Novel"}  # Data for template
     )
 
 
@@ -548,7 +548,7 @@ async def startup_event():
     - Loading models
     """
     # Upload directory is already set up in the global scope
-    print("🎨 MyMangaka is ready!")
+    print("🎨 Mangaroo is ready!")
     print("📚 Upload a PDF novel to transform it into manga")
 
 
@@ -566,7 +566,7 @@ async def shutdown_event():
     # Close all open reading sessions
     for session_id, session in reading_sessions.items():
         session.close()
-    print("👋 MyMangaka shutting down...")
+    print("👋 Mangaroo shutting down...")
 
 
 # ========================================

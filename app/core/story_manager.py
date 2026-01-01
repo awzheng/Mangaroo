@@ -1,6 +1,6 @@
 """
 ========================================
-Story Manager Module for MyMangaka
+Story Manager Module for Mangaroo
 ========================================
 
 *** CRITICAL FILE - THE HEART OF THE APP ***
