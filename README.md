@@ -33,6 +33,24 @@ Mangaroo is a web application that transforms PDF novels into manga-style visual
 
 The app features a Story Bible that tracks characters, settings, and visual elements across pages to ensure consistent art style and character appearances, similar to how a TV show maintains continuity across episodes.
 
+## Diagrams
+
+### Upload & Session Creation
+
+![Upload & Session Creation](assets/diagrams/mangaroo-upload.png)
+
+### Reader Text Display
+
+![Reader Text Display](assets/diagrams/mangaroo-text.png)
+
+### Image Generation
+
+![Image Generation](assets/diagrams/mangaroo-image.png)
+
+### Story Bible Logic
+
+![Story Bible](assets/diagrams/mangaroo-bible.png)
+
 ## Features
 
 - **Smart PDF Processing** - Extracts text page-by-page with automatic cleaning and formatting
