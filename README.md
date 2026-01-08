@@ -6,6 +6,12 @@
 ![FastAPI](https://img.shields.io/badge/FastAPI-0.115-green.svg)
 ![License](https://img.shields.io/badge/License-MIT-yellow.svg)
 
+## ‼️ Read the DevLog ‼️
+
+I documented the entire development process, technical decisions, and reasoning behind every design choice in the devlog. It covers system design diagrams and decisions, and all the lessons learned along the way. No AI slop, fully authentic. I promise.
+
+Check it out here: [devlog.md](devlog.md)
+
 ## Table of Contents
 
 - [Overview](#overview)
