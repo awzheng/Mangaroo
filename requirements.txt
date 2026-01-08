@@ -16,8 +16,11 @@ jinja2==3.1.4
 # PDF Processing - using newer version with pre-built wheels
 pymupdf==1.24.10
 
-# Google AI (Gemini + Imagen)
+# Google AI - Gemini for text (Story Bible)
 google-generativeai==0.8.3
+
+# Google AI - Imagen for image generation
+google-genai==0.3.0
 
 # Settings Management
 pydantic-settings==2.5.2

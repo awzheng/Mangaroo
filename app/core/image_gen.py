@@ -31,8 +31,9 @@ import base64
 # Type hints
 from typing import Optional, Dict
 
-# Google's Generative AI library
-import google.generativeai as genai
+# Google's new GenAI library for Imagen
+from google import genai
+from google.genai import types
 
 # Our configuration for API keys
 from .config import get_settings
@@ -83,11 +84,12 @@ class ImageGenerator:
         settings = get_settings()
         
         if settings.gemini_api_key:
-            # Set up with our API key
-            genai.configure(api_key=settings.gemini_api_key)
+            # Set up the client with our API key
+            self.client = genai.Client(api_key=settings.gemini_api_key)
             self.configured = True
         else:
             # No API key - can't generate images
+            self.client = None
             self.configured = False
     
     async def generate_panel(
@@ -145,38 +147,29 @@ class ImageGenerator:
         )
         
         try:
-            # Create an Imagen model instance
-            # "imagen-3.0-generate-002" is the model identifier
-            imagen = genai.ImageGenerationModel("imagen-3.0-generate-002")
-            
-            # Generate the image!
+            # Generate the image using the new GenAI client!
             # This is the actual API call to Google
-            result = await imagen.generate_images_async(
+            response = self.client.models.generate_image(
+                model="imagen-3.0-generate-001",  # Imagen 3 model
                 prompt=prompt,
-                number_of_images=1,          # Generate 1 image
-                aspect_ratio=aspect_ratio,    # e.g., "3:4"
-                safety_filter_level="block_few",  # Allow most content
-                person_generation="allow_adult"   # Allow adult characters
+                config=types.GenerateImageConfig(
+                    number_of_images=1,          # Generate 1 image
+                    aspect_ratio=aspect_ratio,    # e.g., "3:4"
+                    safety_filter_level="block_few",  # Allow most content
+                    person_generation="allow_adult"   # Allow adult characters
+                )
             )
             
             # Check if we got an image back
-            if result.images:
-                # Get the first (and only) image
-                image = result.images[0]
+            if response.generated_image:
+                # Get the generated image
+                generated_image = response.generated_image
                 
-                # Convert the image to base64 format
-                # This allows us to embed it directly in HTML
-                image_bytes = image._pil_image  # Get PIL Image object
+                # The image is already in bytes format
+                image_bytes = generated_image.image.image_bytes
                 
-                # Import io for in-memory file operations
-                import io
-                
-                # Save image to a memory buffer as PNG
-                buffer = io.BytesIO()
-                image_bytes.save(buffer, format="PNG")
-                
-                # Encode the bytes as base64 text
-                image_data = base64.b64encode(buffer.getvalue()).decode('utf-8')
+                # Encode the bytes as base64 text for HTML display
+                image_data = base64.b64encode(image_bytes).decode('utf-8')
                 
                 return {
                     "success": True,
