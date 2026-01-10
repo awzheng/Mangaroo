@@ -7,11 +7,24 @@ I would appreciate any feedback you may have!
 
 Instagram, Discord @awzheng
 
+## Important: Devlog Updates Underway
+
+Thanks so much for dropping by the Mangaroo DevLog.
+You may notice that some parts of the devlog are currently under construction.
+That's because I'm in the process of revamping it to match the quality of my other projects, SageWall and Crawlstars.
+See them here: [CrawlStars Devlog](https://github.com/awzheng/CrawlStars/blob/main/devlog.md) and [SageWall Devlog](https://github.com/awzheng/SageWall/blob/main/devlog.md)
+
+With WaterlooWorks and ECE 1B filling up my schedule, progress has been halted for now.
+I will continue to update the devlog as I make progress on Mangaroo!
+Thank you for your patience!
+Please show my other projects your support by reading my dev journey!
+
 ## Why I made Mangaroo
 
 I've always wondered about the psychology behind what makes some books more memorable and "readable" than others.
 How come it was so easy for me as a child in the early 2010s to be content with rereading Diary of a Wimpy Kid and Pokemon books over and over again?
-By no means was I a picky reader, my favourite genre of books was still nonfiction, but fiction has always had a soft spot in my heart.
+By no means was I a picky reader.
+My favourite genre of books was still nonfiction, but fiction has always had a soft spot in my heart.
 
 It's quite strange as well.
 I personally believe that these kinds of books were the earliest forms of "brainrot" that I was introduced to, namely books like Diary of a Wimpy Kid and Big Nate.
