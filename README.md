@@ -33,7 +33,7 @@ Check it out here: [devlog.md](devlog.md)
 
 Mangaroo is a web application that transforms PDF novels into manga-style visual experiences. It uses AI to read your novel page-by-page and generate manga illustrations that maintain visual continuity throughout your story.
 
-The app features a Story Bible that tracks characters, settings, and visual elements across pages to ensure consistent art style and character appearances, similar to how a TV show maintains continuity across episodes.
+In order to save credits, the app features a Story Bible that tracks characters, settings, and visual elements across pages to ensure consistent art style and character appearances, similar to how a TV show maintains continuity across episodes.
 
 ## Diagrams
 
