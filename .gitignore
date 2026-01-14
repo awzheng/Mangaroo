@@ -75,3 +75,7 @@ htmlcov/
 # ----------------------------------------
 .vercel
 
+# ----------------------------------------
+# my devlog draft in progress (behind the scenes)
+# ----------------------------------------
+devlog_draft.md

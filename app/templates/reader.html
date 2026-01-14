@@ -387,7 +387,8 @@ KEYBOARD SHORTCUTS:
         // These values come from Jinja2 template variables
         // They're set in main.py when rendering this page
         const sessionId = '{{ session_id }}';    // Unique ID for this reading session
-        const totalPages = {{ total_pages }};    // How many pages in the PDF
+        // eslint-disable-next-line
+        const totalPages = {{ total_pages | default (0) }};    // How many pages in the PDF
 
         // Track current state
         let currentPage = 0;        // Which page we're on (0-indexed)

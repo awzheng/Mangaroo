@@ -108,8 +108,14 @@ It makes our API documentation way more human-readable so that we can test our e
 
 > Andrew, I now understand what FastAPI is. However, what's Uvicorn?
 
-Uvicorn is an ASCI server that runs our FastAPI application written in python.
+Uvicorn is an ASGI server that runs our FastAPI application written in python.
 ASGI stands for async server gateway interface, making it perfect for our async FastAPI application.
+It also supports other features in case I wish to expand Mangaroo or experiment with other tools:
+- WebSocket support
+- HTTP/2 support
+- HTTP/3 support
+- Long-lived connections (reusing connections for multiple requests)
+
 When we run `uvicorn app.main:app`, we're essentially saying "Uvicorn, please run our FastAPI app defined in app/main.py".
 
 ## Project Diagrams
@@ -224,3 +230,6 @@ We could also store the user's PDF file uploads on a cloud database such as AWS 
 
 Now that we've established the scope and functions behind Mangaroo, let's get building!
 
+# Episode 2: Upload Path
+
+![Upload path diagram](assets/diagrams/mangaroo-upload.png)
