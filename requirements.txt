@@ -19,8 +19,8 @@ pymupdf==1.24.10
 # Google AI - Gemini for text (Story Bible)
 google-generativeai==0.8.3
 
-# Google AI - Imagen for image generation
-google-genai==0.3.0
+# Google Cloud - Vertex AI for Imagen image generation
+google-cloud-aiplatform==1.40.0
 
 # Settings Management
 pydantic-settings==2.5.2

@@ -12,6 +12,7 @@
 .env.local
 .env.production
 .env*.local
+service-account-key.json
 
 # ----------------------------------------
 # Python compiled files

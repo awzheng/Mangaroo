@@ -55,6 +55,13 @@ class Settings(BaseSettings):
     # This is read from GEMINI_API_KEY in .env
     gemini_api_key: str = ""
     
+    # ---- Google Cloud Configuration ----
+    # Google Cloud project ID for Vertex AI
+    google_cloud_project: str = ""
+    
+    # Path to service account JSON key file
+    google_application_credentials: str = ""
+    
     # ---- App Configuration ----
     # The name of our application
     app_name: str = "Mangaroo"
