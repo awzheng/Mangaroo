@@ -14,6 +14,8 @@ Also, I do not support the monetization of AI art. I am using AI art purely for 
 
 Check it out here: [devlog.md](devlog.md)
 
+![mangaroo thumbnail](assets/mangaroo-thumbnail.png)
+
 ## Table of Contents
 
 - [Overview](#overview)
