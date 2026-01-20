@@ -109,7 +109,7 @@ It makes our API documentation way more human-readable so that we can test our e
 > Andrew, I now understand what FastAPI is. However, what's Uvicorn?
 
 Uvicorn is an ASGI server that runs our FastAPI application written in python.
-ASGI stands for async server gateway interface, making it perfect for our async FastAPI application.
+ASGI stands for Async Server Gateway Interface, making it perfect for our async FastAPI application.
 It also supports other features in case I wish to expand Mangaroo or experiment with other tools:
 - WebSocket support
 - HTTP/2 support
@@ -232,4 +232,178 @@ Now that we've established the scope and functions behind Mangaroo, let's get bu
 
 # Episode 2: Upload Path
 
+My devlogs follow the path of data flow through the system diagram. We'll begin by examining `main.py` (and skip the boring frontend part!)and follow through all the functions in the upload path.
+
 ![Upload path diagram](assets/diagrams/mangaroo-upload.png)
+
+## main.py 
+
+The general path within `main.py` includes session creation, the upload route, and saving the upload path to the session.
+
+### ReadingSession
+
+`ReadingSession` is the backbone of our upload flow. Each PDF upload creates one session object that coordinates the PDF processor, Story Bible, and user state. 
+
+> Andrew! Why create a whole class for sessions? Why not just use a dictionary to store PDF paths?
+
+Making a class is better because classes group both data and methods (functions).
+Each session manages its own cleanup using `close()`, and sets its own processor and story bible.
+It also includes type safety, making it easier to understand what a session contains.
+Each user's ReadingSession is composed of other objects such as PDFProcessor and StoryBible.
+Thus, the typical life cycle for a ReadingSession is construction → active use → cleanup.
+
+```python
+class ReadingSession:
+    """
+    Represents an active reading session.
+    
+    Each time someone uploads a PDF, we create a ReadingSession.
+    It keeps track of:
+    - The PDF file they're reading
+    - Their Story Bible (character/scene context)
+    - Which page they're on
+    
+    Think of it like a bookmark that also remembers
+    what all the characters look like.
+    """
+    
+    def __init__(self, pdf_path: str, filename: str):
+        """
+        Create a new reading session.
+        
+        Args:
+            pdf_path: Where the uploaded PDF is saved
+            filename: Original name of the file
+        """
+        self.pdf_path = pdf_path          # Path to the saved PDF
+        self.filename = filename          # Original filename for display
+        self.story_bible = StoryBible()   # AI context tracker
+        self.current_page = 0             # Track which page user is on
+        
+        # Open the PDF and get basic info
+        self.processor = PDFProcessor(pdf_path)
+        self.processor.open()
+        self.total_pages = self.processor.total_pages
+        self.metadata = self.processor.get_metadata()
+        
+    def close(self):
+        """
+        Clean up when the session ends.
+        
+        IMPORTANT: Always clean up resources!
+        - Close open files
+        - Free up memory
+        """
+        self.processor.close()
+```
+
+As you can see, the excerpt above just contains our init and close functions which are just the fundamentals of object-oriented programming.
+`close()` is important to avoid memory leaks.
+
+> Andrew! Why not just use a dataclass or Python dictionaries?
+
+Dataclasses are a good alternative for simple data-only storage, but they don't provide the same level of functionality as classes.
+Dictionaries are too simple for our needs and don't provide type safety (in Python).
+Mangaroo is a very object-oriented system and classes are a natural fit.
+
+Let's leave dictionaries to the LeetCode lunatics.
+
+> Andrew! What happens when the server restarts?
+
+At the moment, when the server restarts, user sessions are lost.
+
+> Seriously? How do you plan to scale this?
+
+We could store the sessions in cookies or a database if we wanted to.
+If you love databases, I would highly recommend checking out [CrawlStars](https://github.com/andrewzheng/CrawlStars) (MongoDB) and [SageWall](https://github.com/andrewzheng/SageWall) (AWS S3)!
+
+Also, I don't plan to commercialize this anytime soon.
+I would never try to scale something using AI art.
+Gross behaviour!
+This project is more of a for-fun exercise to prove that I can build a full-stack app using FastAPI.
+
+### upload_pdf() Route Handler
+
+`upload_pdf()` includes the entire upload flow: validation → storage → session creation → response.
+It sounds like a lot, but don't worry, we'll go through it step by step.
+
+```python
+@app.post("/api/upload")
+async def upload_pdf(file: UploadFile = File(...)):
+    """
+    Upload a PDF file and create a reading session.
+    
+    ROUTE: POST /api/upload
+    
+    FLOW:
+    1. Receive the uploaded file
+    2. Validate it (is it a PDF? is it too big?)
+    3. Save it to the uploads folder
+    4. Create a ReadingSession
+    5. Return the session ID so frontend can redirect to reader
+    """
+    # ---- Step 1: Validate file type ----
+    if not file.filename.lower().endswith('.pdf'):
+        raise HTTPException(status_code=400, detail="Only PDF files are allowed")
+    
+    # ---- Step 2: Check file size ----
+    settings = get_settings()
+    contents = await file.read()  # Read the file contents into memory
+    
+    if len(contents) > settings.max_file_size_mb * 1024 * 1024:  # Convert MB to bytes
+        raise HTTPException(
+            status_code=400, 
+            detail=f"File too large. Maximum size is {settings.max_file_size_mb}MB"
+        )
+    
+    # ---- Step 3: Generate unique session ID ----
+    session_id = str(uuid.uuid4())[:8]
+    
+    # ---- Step 4: Save the file ----
+    safe_filename = f"{session_id}_{file.filename}"
+    file_path = Path(UPLOAD_DIR) / safe_filename
+    
+    with open(file_path, "wb") as f:  # "wb" = write binary
+        f.write(contents)
+    
+    # ---- Step 5: Create reading session ----
+    try:
+        session = ReadingSession(str(file_path), file.filename)
+        reading_sessions[session_id] = session  # Store in our dictionary
+        
+        return JSONResponse({
+            "success": True,
+            "session_id": session_id,
+            "filename": file.filename,
+            "total_pages": session.total_pages,
+            "metadata": session.metadata,
+            "redirect_url": f"/reader/{session_id}"
+        })
+    except Exception as e:
+        # If something goes wrong, clean up the file we saved
+        os.remove(file_path)
+        raise HTTPException(status_code=500, detail=f"Failed to process PDF: {str(e)}")
+```
+
+It starts off by identifying as an API call with `@app.post("/api/upload")`.
+Then, it follows the steps below.
+
+#### 1. Validate file type
+
+A simple check with the file name to ensure that it's a valid PDF file.
+In some systems such as testing the app on Google Chrome on MacOS, the upload file window only allows PDF uploads anyway.
+Very convenient!
+
+#### 2. Validate file size
+
+After converting MB to bytes, we check that the file is smaller than `settings.max_file_size_mb` which is defined as 50MB in settings from `get_settings()` which retrieves information from `app/core/config.py`.
+Here's the excerpt from `config.py` to prove it:
+
+```python
+    # Maximum file size allowed (in megabytes)
+    # Prevents users from uploading huge files that slow down the server
+    max_file_size_mb: int = 50
+```
+Whew!
+
+> Andrew! Why do we validate both the file extension and file size? Why can't we just try to open it as a PDF?

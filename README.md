@@ -16,8 +16,6 @@ Check it out here: [devlog.md](devlog.md)
 
 ![mangaroo thumbnail](assets/mangaroo-thumbnail.png)
 
-## ‼️ Read the DevLog ‼️
-
 ## Table of Contents
 
 - [Overview](#overview)
