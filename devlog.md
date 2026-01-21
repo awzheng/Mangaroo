@@ -407,3 +407,146 @@ Here's the excerpt from `config.py` to prove it:
 Whew!
 
 > Andrew! Why do we validate both the file extension and file size? Why can't we just try to open it as a PDF?
+
+Slow down, tiger!
+It's better to check early and fail fast than to get stuck too deep in a sunk cost.
+Extension checking is a super cheap, fast and intuitive way to check if it's a PDF file.
+
+> Andrew! What's the worst that could happen without validation?
+
+Our app might process a malicious file upload causing server crashes or DoS attacks, such as someone uploading a 10GB file.
+That's why we have multiple layers of validation to filter out evil users.
+
+> Andrew! What does `await file.read()` do?
+
+Good eye! `await` is one of our FastAPI async keywords.
+`await` is used to pause the execution of the current function (and let the cpu work on other tasks)until the awaited operation completes.
+In this case, it pauses the `upload_pdf()` function until the file is read.
+In the meantime, our app can work on handling other readers' requests, generating images, and managing the story.
+
+Let's explain it in Mickey Mouse terms.
+Think of Mangaroo as a pizzeria with a single chef (FastAPI).
+It takes a while for the pizza (PDF File) to bake (process).
+A lazy (synchronous) chef would stand there and watch the pizza bake until it's done.
+They would freeze and refuse to take other orders.
+An efficient (asynchronous) chef, on the other hand, would use the downtime to take other orders, prepare ingredients, and clean the kitchen.
+
+> Andrew! Would `upload_pdf()` still work without `await`?
+
+Unfortunately not.
+If it takes too long to read one user's PDF file, our app would be stuck processing that request and wouldn't be able to handle other users' requests.
+
+Using the pizzeria analogy, the lazy chef would be staring at the oven as the customers wait in line, the other pizzas remain unmade, and the kitchen gets dirtier.
+
+Thus, step 2 is an async file size check: the second half of the validation process for reader A's upload.
+I would have used an em dash if it wasn't overridden by AI.
+
+#### 3. Generate unique session ID
+
+After validating file input, we generate a Universally Unique Identifier (UUID) for reader A's upload.
+
+> Andrew! Why use UUID instead of incrementing numbers (1, 2, 3...) for session IDs? What does `[:8]` do?
+
+UUID is a 128-bit number that is used to identify information in computer systems.
+This means that it can range in value from 0 to 2^128 - 1 (think 0...0 to 1...1 in binary), which is approximately 3.4 x 10^38.
+Thus, since there are so many possible values, it's virtually impossible for multiple users to share a UUID.
+One user won't accidentally access another user's session.
+Since the UUID can get really long (making it hard to render/read), `[:8]` is used to truncate it to the first 8 characters to make it more human-readable.
+
+#### 4. Save the file
+
+Step 4 is quite simple.
+We save the file to a session directory with the session ID + original filename as the path.
+This is represented in the system design diagram as the cylindrical uploads/ node!
+
+> Andrew! Why save the file instead of just keeping it in memory?
+
+It's better to save the file for FastAPI to handle it faster.
+
+#### 5. Create reading session
+
+Finally it's time to create a reading session.
+It calls the `ReadingSession` constructor we defined earlier and stores key information such as session ID, file path, and total pages in a JSON response.
+
+Finally, we're ready to start processing the PDF and extract text to generate images with!
+
+## pdf_processor.py - PDFProcessor Initialization
+
+Moving along the path of the system design diagram: after saving the PDF to the session uploads/ directory, we move on to `pdf_processor.py` to process the PDF.
+
+The `PDFProcessor` class wraps the PyMuPDF (fitz) library to safely handle PDF operations. It follows the open/close pattern for resource management.
+
+```python
+class PDFProcessor:
+    """
+    Handles PDF file operations and text extraction.
+    
+    WHAT IS A CLASS?
+    - A class is like a blueprint for creating objects
+    - It groups related functions (methods) and data together
+    - PDFProcessor is our "tool" for working with one PDF file
+    
+    HOW TO USE:
+        processor = PDFProcessor("mybook.pdf")  # Create processor
+        processor.open()                         # Open the PDF
+        text = processor.get_page_text(0)       # Get page 1 text
+        processor.close()                        # Close when done
+    """
+    
+    def __init__(self, pdf_path: str):
+        """
+        Initialize (set up) the PDF processor.
+        
+        __init__ is a special method that runs when you create a new object.
+        
+        Args:
+            pdf_path: The file path to the PDF (e.g., "uploads/mybook.pdf")
+        """
+        self.pdf_path = Path(pdf_path)
+        
+        # These will be set when we open the PDF
+        # The underscore prefix (_doc) indicates "private" - internal use only
+        self._doc: Optional[fitz.Document] = None  # The PDF document object
+        self._total_pages: int = 0                  # Number of pages
+        
+    def open(self) -> bool:
+        """
+        Open the PDF document for reading.
+        
+        WHY SEPARATE OPEN/CLOSE?
+        - Opening a file takes resources (memory)
+        - We open once, do all our work, then close
+        - This is more efficient than opening for each operation
+        
+        Returns:
+            True if the PDF opened successfully, False if there was an error
+        """
+        try:
+            self._doc = fitz.open(self.pdf_path)
+            self._total_pages = len(self._doc)
+            return True
+        except Exception as e:
+            print(f"Error opening PDF: {e}")
+            return False
+    
+    def close(self):
+        """
+        Close the PDF document and free up memory.
+        
+        IMPORTANT: Always close files when done!
+        """
+        if self._doc:
+            self._doc.close()
+            self._doc = None
+    
+    @property
+    def total_pages(self) -> int:
+        """
+        Get total number of pages in the PDF.
+        
+        @property decorator makes this act like a variable:
+        - Instead of: processor.total_pages()
+        - You write: processor.total_pages
+        """
+        return self._total_pages
+```
