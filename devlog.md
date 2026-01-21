@@ -470,11 +470,12 @@ It calls the `ReadingSession` constructor we defined earlier and stores key info
 
 Finally, we're ready to start processing the PDF and extract text to generate images with!
 
-## pdf_processor.py - PDFProcessor Initialization
+## pdf_processor.py
 
 Moving along the path of the system design diagram: after saving the PDF to the session uploads/ directory, we move on to `pdf_processor.py` to process the PDF.
 
-The `PDFProcessor` class wraps the PyMuPDF (fitz) library to safely handle PDF operations. It follows the open/close pattern for resource management.
+The `PDFProcessor` class is essentially a wrapper for the the PyMuPDF (fitz) library to safely handle PDF operations. 
+It follows the open/close pattern for resource management.
 
 ```python
 class PDFProcessor:
@@ -550,3 +551,137 @@ class PDFProcessor:
         """
         return self._total_pages
 ```
+
+Some key notes about `PDFProcessor`:
+
+- The constructor `__init__` contains two key variables: the PDF path and total number of pages.
+- `open` opens the user's uploaded PDF to start reading.
+- `close` closes the user's PDF to prevent memory leaks.
+
+The open/close pattern is a common practice for file handling in other languages.
+Now let's answer your barrage of FAQs:
+
+> Andrew! What's `@property`?
+
+`@property` is a Python decorator.
+Decorators are a tag that takes the function below as an argument to be modified, creating a new function.
+Thus, `@property` modifies the `total_pages` method to act like an input variable for the `PDFProcessor` class.
+
+> What function do we get from `@property`?
+
+We get the function of being able to access the `total_pages` variable without having to call the `total_pages()` method.
+
+> Why do we need to access `total_pages` without calling the `total_pages()` method?
+
+It makes our future code (which takes `total_pages` as a variable) much easier to read and maintain.
+It also made me a more well-rounded and knowledgeable software dev overall!
+
+> Andrew! Why use a wrapper for PyMuPDF instead of using it directly?
+
+Creating a wrapper class is a much better practice in software engineering.
+It makes our code way easier to read and maintain.
+It can be kinda compared to creating helper functions for custom classes in your object-oriented programming class in order to access typically private or protected variables/functions.
+
+> Andrew! What even is PyMuPDF and why did you choose it over other PDF libraries?
+
+PyMuPDF is a Python binding (a wrapper for code written in other programming languages) for the MuPDF library which is a framework written in C.
+That means that, in a way, we have gifted Mangaroo the power of multiversal travel.
+There are also some alternatives to PyMuPDF, such as PyPDF2 (slower, but more lightweight) and pdfplumber (better for tables).
+We've imported `pymupdf` by the name of `fitz` since it's a tutorial convention.
+It's done a great job at extractin text, and it also has the capability to extract images, metadata, and even render pages.
+
+> Andrew! Why did you separate `__init__()` and `open()`? Why not open the PDF in the constructor?
+
+This comes down the the fact that seperating the initialization (construction) and the function (opening) of an object is a much better practice than keeping them jumbled together.
+By seperating `__init__()` and `open()`, we can read and debug the code much more efficiently.
+It also makes the resource lifetime explicitly clear.
+Thus, we can first focus on creating the `PDFProcessor` object, and then we can decide whether to open the PDF later on.
+
+As an added bonus, our system design diagram (user upload data path) is clear and linear, making it super easy to read and follow, especially for beginners!
+
+## story_manager.py
+
+`StoryBible` is the absolute hero of quantifying what I've achieved through Mangaroo.
+By running some calculations, I've narrowed down the fact that I reduced context token usage by **92%** by storing plot context in a JSON instead of forcing Gemini to reread the story and rewatch all of our images every time we want to create a new page (in order to preserve a relatively consistent user experience).
+
+Essentially, the `StoryBible` class maintains narrative context across pages. 
+It starts with an empty state and builds up character/scene knowledge (extracted and returned by Gemini) as we read.
+
+```python
+class StoryBible:
+    """
+    The Story Bible maintains narrative and visual context across pages.
+    
+    ANALOGY: Think of it like a TV show's "series bible"
+    - Character sheets: What does each character look like?
+    - Setting guides: What does each location look like?
+    - Plot summary: What's happened so far?
+    
+    This ensures visual consistency - like how animated characters
+    always look the same episode to episode.
+    """
+    
+    def __init__(self):
+        """
+        Initialize the Story Bible with an empty state.
+        
+        The state dictionary tracks everything we know about the story.
+        It starts empty and builds up as we read more pages.
+        """
+        # The main state dictionary - this is what we're tracking
+        self.state: Dict = {
+            # Description of the current scene for the manga panel
+            "current_scene": "",
+            
+            # List of characters with their visual descriptions
+            # Each character: {name, appearance, clothing, expression, position}
+            "characters": [],
+            
+            # Recommended art style for this scene
+            # e.g., "dramatic shadows", "soft lighting", "action lines"
+            "visual_style": "",
+            
+            # Running summary of the story so far
+            "story_summary": "",
+            
+            # Emotional tone: "tense", "romantic", "action-packed", etc.
+            "mood": "",
+            
+            # When the scene takes place
+            "time_of_day": "",
+            
+            # Background/setting details
+            "location_details": ""
+        }
+        
+        # Set up the connection to Google's AI
+        self._configure_genai()
+        
+    def _configure_genai(self):
+        """
+        Configure the Google Generative AI client.
+        
+        This sets up our connection to Google's Gemini AI.
+        We need a valid API key for this to work.
+        """
+        settings = get_settings()
+        
+        if settings.gemini_api_key:
+            # Configure the library with our API key
+            genai.configure(api_key=settings.gemini_api_key)
+            
+            # Create a Gemini 1.5 Pro model instance
+            self.model = genai.GenerativeModel('gemini-1.5-pro')
+        else:
+            # No API key - AI features won't work
+            self.model = None
+```
+
+`StoryBible` contains a dictionary that tracks essential information such as:
+- `current_scene`
+- `characters`
+- `visual_style`
+- `story_summary`
+- `mood`
+- `time_of_day`
+- `location_details`
