@@ -685,3 +685,35 @@ class StoryBible:
 - `mood`
 - `time_of_day`
 - `location_details`
+
+Which we initialize as empty.
+
+> Andrew! What is the "Story Bible" concept? Where does this term come from?
+
+Maintaining a Story Bible (aka show bible or pitch bible) is a practice used in the film industry to keep writing and design on track.
+It's not just a word that I made up!
+Read more about it on [Wikipedia](https://en.wikipedia.org/wiki/Bible_(screenwriting)).
+
+Having a story bible gives Mangaroo very distinct advantages as a standalone FastAPI app rather than a generic AI wrapper:
+
+- OOP system design
+- 92% reduced context token usage
+- O(1) memory complexity
+- Much faster image generation
+- Consistent image generation aka lower chance of AI slop
+
+After initializing the `StoryBible`, we call `self._configure_genai()` to configure the connection to Google's AI.
+
+> Andrew! Why Gemini 1.5 Pro instead of Flash or other models?
+
+At the time of making Mangaroo (Nov 2025), Gemini 1.5 Pro was the best model for my use case.
+It's great at handling JSON format extraction (character names, descriptions) and reasoning with complex tasks such as extracting story context.
+I'm thinking of switching to Gemini 3 Flash in the future.
+
+Anyway, now that our environment is set up and configured correctly, we've reached all nodes in our Upload & Sessino Creation diagram path. Time to move onto displaying text!
+
+# Episode 3: Reader Text Display Path
+
+Reader text display is a simple process for what is essentially a glorified e-reader that helps us extract image context.
+
+![Reader path diagram](assets/diagrams/mangaroo-text.png)
