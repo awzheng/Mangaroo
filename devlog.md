@@ -232,7 +232,9 @@ Now that we've established the scope and functions behind Mangaroo, let's get bu
 
 # Episode 2: Upload Path
 
-My devlogs follow the path of data flow through the system diagram. We'll begin by examining `main.py` (and skip the boring frontend part!)and follow through all the functions in the upload path.
+My devlogs follow the path of data flow through the system diagram. 
+We'll begin by examining `main.py` and follow through all the functions in the upload path.
+Don't worry about frontend yet, Episode 3 covers reader UI in more depth!
 
 ![Upload path diagram](assets/diagrams/mangaroo-upload.png)
 
@@ -249,8 +251,17 @@ The general path within `main.py` includes session creation, the upload route, a
 Making a class is better because classes group both data and methods (functions).
 Each session manages its own cleanup using `close()`, and sets its own processor and story bible.
 It also includes type safety, making it easier to understand what a session contains.
+
 Each user's ReadingSession is composed of other objects such as PDFProcessor and StoryBible.
 Thus, the typical life cycle for a ReadingSession is construction → active use → cleanup.
+
+In case you're still wondering about dictionaries:
+Dictionaries store data, but classes encapsulate both data AND behavior. 
+Our ReadingSession needs methods like `close()` to manage its own lifecycle.
+A dictionary can't clean up after itself since it's just a data container.
+
+Furthermore, classes provide a clear API contract (what methods exist) that dictionaries don't offer. 
+Type hints help, but they don't enforce behavior.
 
 ```python
 class ReadingSession:
@@ -299,14 +310,6 @@ class ReadingSession:
 
 As you can see, the excerpt above just contains our init and close functions which are just the fundamentals of object-oriented programming.
 `close()` is important to avoid memory leaks.
-
-> Andrew! Why not just use a dataclass or Python dictionaries?
-
-Dataclasses are a good alternative for simple data-only storage, but they don't provide the same level of functionality as classes.
-Dictionaries are too simple for our needs and don't provide type safety (in Python).
-Mangaroo is a very object-oriented system and classes are a natural fit.
-
-Let's leave dictionaries to the LeetCode lunatics.
 
 > Andrew! What happens when the server restarts?
 
@@ -390,9 +393,13 @@ Then, it follows the steps below.
 
 #### 1. Validate file type
 
-A simple check with the file name to ensure that it's a valid PDF file.
+Our first line of defense is to check the file name to ensure that it's a valid PDF file.
 In some systems such as testing the app on Google Chrome on MacOS, the upload file window only allows PDF uploads anyway.
-Very convenient!
+
+> Andrew! What happens if someone renames a malicious file to have a .pdf extension?
+
+This will be addressed down below when we talk about PyMuPDF!
+Just know that for now, we're building multiple security layers that fail independently for a multi-layer defense strategy.
 
 #### 2. Validate file size
 
@@ -431,6 +438,9 @@ A lazy (synchronous) chef would stand there and watch the pizza bake until it's 
 They would freeze and refuse to take other orders.
 An efficient (asynchronous) chef, on the other hand, would use the downtime to take other orders, prepare ingredients, and clean the kitchen.
 
+Thus, in technical terms, while we `await file.read()`, the current coroutine yields control back to the event loop, allowing other coroutines (such as other users' file uploads, story generation, etc.) to run.
+Mangaroo is what we call I/O bound because it spends most of its time waiting for I/O operations (file reading, API calls, etc.) to complete.
+
 > Andrew! Would `upload_pdf()` still work without `await`?
 
 Unfortunately not.
@@ -439,7 +449,6 @@ If it takes too long to read one user's PDF file, our app would be stuck process
 Using the pizzeria analogy, the lazy chef would be staring at the oven as the customers wait in line, the other pizzas remain unmade, and the kitchen gets dirtier.
 
 Thus, step 2 is an async file size check: the second half of the validation process for reader A's upload.
-I would have used an em dash if it wasn't overridden by AI.
 
 #### 3. Generate unique session ID
 
@@ -449,9 +458,18 @@ After validating file input, we generate a Universally Unique Identifier (UUID) 
 
 UUID is a 128-bit number that is used to identify information in computer systems.
 This means that it can range in value from 0 to 2^128 - 1 (think 0...0 to 1...1 in binary), which is approximately 3.4 x 10^38.
+
 Thus, since there are so many possible values, it's virtually impossible for multiple users to share a UUID.
+To put it into perspective, the chance of overlap is 1 in 2^64.
+You're more likely to be struck by lighting twice while winning the lottery!
+
+On the other hand, if the UIDs were incremental, user 1000 would be able to try accessing session 999 or 1001 and so on.
 One user won't accidentally access another user's session.
+
+One tradeoff of having these ridiculously long UUIDs is that they're hard to read and render.
 Since the UUID can get really long (making it hard to render/read), `[:8]` is used to truncate it to the first 8 characters to make it more human-readable.
+
+At the moment, the possibility of Mangaroo useres sharing an UUID is negligible.
 
 #### 4. Save the file
 
@@ -461,7 +479,10 @@ This is represented in the system design diagram as the cylindrical uploads/ nod
 
 > Andrew! Why save the file instead of just keeping it in memory?
 
-It's better to save the file for FastAPI to handle it faster.
+Keeping it in disk has many advantages.
+- PyMuPDF (aka Fitz) can't open files in memory. I will explain this in detail below.
+- If we're servicing many concurrent users, the price of RAM (many many gigabytes) would get dangerously expensive.
+- We've already written the user upload to disk when checking file size.
 
 #### 5. Create reading session
 
@@ -587,8 +608,11 @@ It can be kinda compared to creating helper functions for custom classes in your
 PyMuPDF is a Python binding (a wrapper for code written in other programming languages) for the MuPDF library which is a framework written in C.
 That means that, in a way, we have gifted Mangaroo the power of multiversal travel.
 There are also some alternatives to PyMuPDF, such as PyPDF2 (slower, but more lightweight) and pdfplumber (better for tables).
+
 We've imported `pymupdf` by the name of `fitz` since it's a tutorial convention.
-It's done a great job at extractin text, and it also has the capability to extract images, metadata, and even render pages.
+It's done a great job at extracting text, and it also has the capability to extract images, metadata, and even render pages.
+
+When PyMuPDF (aka Fitz) opens an invalid file with a .pdf extension, it will throw an exception and we will remain safe.
 
 > Andrew! Why did you separate `__init__()` and `open()`? Why not open the PDF in the constructor?
 
@@ -702,6 +726,29 @@ Having a story bible gives Mangaroo very distinct advantages as a standalone Fas
 - Much faster image generation
 - Consistent image generation aka lower chance of AI slop
 
+> Andrew! How did you calculate the reduction in context token usage?
+
+Let's quantify the Story Bible's impact on API costs.
+**Control** (no Story Bible):
+- Send entire conversation history with each request
+- Page 1: 500 tokens (just the text)
+- Page 2: 500 + 500 = 1000 tokens (page 1 + page 2)
+- Page 3: 500 + 500 + 500 = 1500 tokens
+- Pattern: O(n²) token growth
+For a 100-page novel:
+- Total tokens = 500 × (1 + 2 + 3 + ... + 100) 
+- = 500 × 5050 = 2,525,000 tokens
+
+**Story Bible approach**:
+- Send only: current page text (500) + JSON context (200)
+- Every request: 700 tokens
+- Pattern: O(1) token growth
+For 100 pages:
+- Total tokens = 700 × 100 = 70,000 tokens
+
+(2,525,000 - 70,000) / 2,525,000 = 97.2% reduction!
+Even accounting for occasional re-syncs or longer context, we're seeing >90% reduction in practice.
+
 After initializing the `StoryBible`, we call `self._configure_genai()` to configure the connection to Google's AI.
 
 > Andrew! Why Gemini 1.5 Pro instead of Flash or other models?
@@ -717,3 +764,7 @@ Anyway, now that our environment is set up and configured correctly, we've reach
 Reader text display is a simple process for what is essentially a glorified e-reader that helps us extract image context.
 
 ![Reader path diagram](assets/diagrams/mangaroo-text.png)
+
+## reader.html - Frontend JavaScript
+
+The reader interface uses vanilla JavaScript to fetch page text asynchronously and update the DOM. This creates a smooth, SPA-like experience without a full framework.
