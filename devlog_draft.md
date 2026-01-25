@@ -308,7 +308,7 @@ class ReadingSession:
         self.processor.close()
 ```
 
-As you can see, the excerpt above just contains our init and close functions which are just the fundamentals of object-oriented programming.
+As you can see, ReadingSession just contains our init and close functions which are just the fundamentals of object-oriented programming.
 `close()` is important to avoid memory leaks.
 
 > Andrew! What happens when the server restarts?
@@ -471,6 +471,15 @@ Since the UUID can get really long (making it hard to render/read), `[:8]` is us
 
 At the moment, the possibility of Mangaroo useres sharing an UUID is negligible.
 
+> Andrew! What if you happened to scale Mangaroo and users shared the same 8-character UID?
+
+There are two main production fixes we could implement to solve that issue.
+
+The first solution would be to check UUID before insert.
+If a newly generated UUID already matches an existing 8-character UID, then it will simply be regenerated.
+
+The second solution for a full-enterprise grade platform would be to just use the full UUID.
+
 #### 4. Save the file
 
 Step 4 is quite simple.
@@ -575,9 +584,11 @@ class PDFProcessor:
 
 Some key notes about `PDFProcessor`:
 
-- The constructor `__init__` contains two key variables: the PDF path and total number of pages.
-- `open` opens the user's uploaded PDF to start reading.
-- `close` closes the user's PDF to prevent memory leaks.
+The constructor initializes the session's state:
+- PDF metadata: path, filename, page count
+- Story Bible: for tracking narrative context
+- Reading position: current_page = 0
+- PDF processor: opened and ready to extract text
 
 The open/close pattern is a common practice for file handling in other languages.
 Now let's answer your barrage of FAQs:
