@@ -439,7 +439,12 @@ They would freeze and refuse to take other orders.
 An efficient (asynchronous) chef, on the other hand, would use the downtime to take other orders, prepare ingredients, and clean the kitchen.
 
 Thus, in technical terms, while we `await file.read()`, the current coroutine yields control back to the event loop, allowing other coroutines (such as other users' file uploads, story generation, etc.) to run.
+
 Mangaroo is what we call I/O bound because it spends most of its time waiting for I/O operations (file reading, API calls, etc.) to complete.
+
+If Mangaroo did not have async, it would be held up by 2 slow operations on the critical path:
+1. File I/O, reading PDFs from disk (which takes ~100ms for a 10MB file)
+2. API Calls which take at least 2-3 seconds for Gemini and 5-10 seconds for Imagen
 
 > Andrew! Would `upload_pdf()` still work without `await`?
 
@@ -496,7 +501,15 @@ Keeping it in disk has many advantages.
 #### 5. Create reading session
 
 Finally it's time to create a reading session.
-It calls the `ReadingSession` constructor we defined earlier and stores key information such as session ID, file path, and total pages in a JSON response.
+It tries to call the `ReadingSession` constructor we defined earlier and stores key information such as session ID, file path, and total pages in a JSON response.
+
+This is an example of a three-layer error architecture.
+
+Layer 1: Validation errors (4xx) such as 400 (file too large/wrong extension), 404 (session not found) where we return user-friendly error messages.
+
+Layer 2: Processing errors (5xx) such as 500 (internal server error such as PDF parsing failed/database down) where we return a generic error message, preventing us from exposing the system internals to the user and instead logging details server-side.
+
+Layer 3: Failure cleanup: our `try/except` block ensures that we delete the file if an error occurs. We won't end up leaking resources when errors bubble up (such as when I ran into many repeated errors when configuring and debugging).
 
 Finally, we're ready to start processing the PDF and extract text to generate images with!
 
@@ -596,8 +609,26 @@ Now let's answer your barrage of FAQs:
 > Andrew! What's `@property`?
 
 `@property` is a Python decorator.
-Decorators are a tag that takes the function below as an argument to be modified, creating a new function.
+Decorators are functions that wrap another function to transform its behavior.
 Thus, `@property` modifies the `total_pages` method to act like an input variable for the `PDFProcessor` class.
+
+As an example, the first code block below is equivalent to the second block despite their different syntax.
+
+Block 1 (decorator syntax):
+
+```python
+@property
+def total_pages(self):
+    return self._total_pages
+```
+
+Block 2 (wrapper syntax):
+
+```python
+def total_pages(self):
+    return self._total_pages
+total_pages = property(total_pages)  # Wrapper
+```
 
 > What function do we get from `@property`?
 
@@ -617,7 +648,7 @@ It can be kinda compared to creating helper functions for custom classes in your
 > Andrew! What even is PyMuPDF and why did you choose it over other PDF libraries?
 
 PyMuPDF is a Python binding (a wrapper for code written in other programming languages) for the MuPDF library which is a framework written in C.
-That means that, in a way, we have gifted Mangaroo the power of multiversal travel.
+That means that, in a way, we have gifted Mangaroo the horsepower of an F1 engine (C) with a simple steering wheel (Python API)!
 There are also some alternatives to PyMuPDF, such as PyPDF2 (slower, but more lightweight) and pdfplumber (better for tables).
 
 We've imported `pymupdf` by the name of `fitz` since it's a tutorial convention.
@@ -768,7 +799,7 @@ At the time of making Mangaroo (Nov 2025), Gemini 1.5 Pro was the best model for
 It's great at handling JSON format extraction (character names, descriptions) and reasoning with complex tasks such as extracting story context.
 I'm thinking of switching to Gemini 3 Flash in the future.
 
-Anyway, now that our environment is set up and configured correctly, we've reached all nodes in our Upload & Sessino Creation diagram path. Time to move onto displaying text!
+Anyway, now that our environment is set up and configured correctly, we've reached all nodes in our Upload & Session Creation diagram path. Time to move onto displaying text!
 
 # Episode 3: Reader Text Display Path
 
