@@ -10,7 +10,7 @@
 
 I documented the entire development process, technical decisions, and reasoning behind every design choice in the devlog. It covers system design diagrams and decisions, and all the lessons learned along the way. Fully authentic, no AI slop. I promise.
 
-Also, I do not support the commercialization of AI art. I am using AI art purely for the purpose of this project as a proof of concept and to design a system with FastAPI.
+Also, I do not support the commercialization of AI art. I am using AI art purely for the purpose of this project as a proof of concept and show that it can be done with FastAPI.
 
 Check it out here: [devlog.md](devlog.md)
 
