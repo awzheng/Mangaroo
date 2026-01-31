@@ -1154,12 +1154,8 @@ def get_page_text(self, page_number: int) -> str:
 As you can see, `get_page_text()` takes the PDF previously extracted by PyMuPDF from the upload path functions (also in `pdf_processor.py`).
 `get_page_text()` also contains multiple safety checks to fail fast by showing errors 
 
-**Key Discussion Points:**
-- Validation before operation: fail fast with clear errors
-- Page indexing: array-style [0] access to PDF pages
-- Method chaining: `get_text()` then `_clean_text()`
-- Why underscore prefix for `_clean_text`? (Private method convention)
-
+You might also notice the syntax on `_clean_text()`.
+It starts with an underscore since it's a convention when we create a private method.
 
 ### _clean_text()
 
@@ -1195,34 +1191,19 @@ def _clean_text(self, text: str) -> str:
     return text
 ```
 
-**Key Discussion Points:**
-- Regex patterns: `\n{3,}` means "3 or more newlines"
-- Why clean text? PDFs have inconsistent formatting
-- Tradeoff: might lose intentional formatting (poetry, code blocks)
-- `strip()` removes leading/trailing whitespace
-- Why is this a private method? (Implementation detail, may change)
+Many of us have had the experience of trying to copy paste some text from a PDF and getting a bunch of extra newlines and spaces for no reason.
+Thus, `_clean_text()` is a chain of methods that uses regex patterns such as `\n{3,}` (which means "3 or more newlines") to remove formatting artifacts and normalize whitespace.
 
-> Andrew! Can you explain the regex patterns used here?
+> Andrew! Can you explain the exact regex patterns that you used here?
 
-**Answer these in your writing:**
-- `\n{3,}`: Match 3 or more consecutive newlines
-- `{3,}`: Quantifier meaning "3 or more"
-- Replace with `\n\n`: normalize to exactly 2 (paragraph break)
-- ` {2,}`: Match 2 or more consecutive spaces
-- Replace with single space: collapse whitespace
-- `re.sub()`: regex substitution (search and replace)
-- Alternative: could use string methods (less powerful)
+For reducing excess lines, the "lower bound" is 3 and the "upper bound" is infinite. We get to detect any number of newlines series that are 3 or more, and `sub` them with just 2 newlines.
 
-> Andrew! Why do PDFs have weird formatting in the first place?
+For reducing excess spaces, the "lower bound" is 2 and the "upper bound" is infinite. We get to detect any number of spaces series that are 2 or more, and `sub` them with just 1 space.
 
-**Answer these in your writing:**
-- PDFs designed for visual presentation, not text extraction
-- Text positioned absolutely on page (no inherent structure)
-- Multiple spaces might just be visual positioning
-- Line breaks don't always mean paragraph breaks
-- Tables, columns, headers complicate extraction
-- PyMuPDF does best effort, but artifacts remain
-- Cleaning is necessary post-processing step
+The tradeoff here is that we might lose some intentional formatting (poetry, code blocks) in exchange for a more readable and consistent format.
+However, chances are that a PDF novel that our readers consider worthy of illustration are likely not going to be strictly formatted in an academic or abstract way.
+
+Now that the text has been cleaned, it's ready to be displayed to the reader and also ready to be sent to Gemini for analysis.
 
 # Episode 4: Image Generation Path
 

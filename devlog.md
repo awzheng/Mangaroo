@@ -1153,3 +1153,54 @@ def get_page_text(self, page_number: int) -> str:
 
 As you can see, `get_page_text()` takes the PDF previously extracted by PyMuPDF from the upload path functions (also in `pdf_processor.py`).
 `get_page_text()` also contains multiple safety checks to fail fast by showing errors 
+
+You might also notice the syntax on `_clean_text()`.
+It starts with an underscore since it's a convention when we create a private method.
+
+### _clean_text()
+
+Cleaning PDF text removes formatting artifacts and normalizes whitespace. This makes text more readable and easier for AI to process.
+
+```python
+def _clean_text(self, text: str) -> str:
+    """
+    Clean extracted text by removing excessive whitespace.
+    
+    WHY CLEAN TEXT?
+    - PDFs often have weird formatting artifacts
+    - Extra newlines, multiple spaces, etc.
+    - Clean text is easier to read and process
+    
+    Args:
+        text: The raw text extracted from PDF
+        
+    Returns:
+        Cleaned up text
+    """
+    import re
+    
+    # Replace 3+ newlines with just 2 (paragraph break)
+    text = re.sub(r'\n{3,}', '\n\n', text)
+    
+    # Replace 2+ spaces with single space
+    text = re.sub(r' {2,}', ' ', text)
+    
+    # Remove whitespace from start and end
+    text = text.strip()
+    
+    return text
+```
+
+Many of us have had the experience of trying to copy paste some text from a PDF and getting a bunch of extra newlines and spaces for no reason.
+Thus, `_clean_text()` is a chain of methods that uses regex patterns such as `\n{3,}` (which means "3 or more newlines") to remove formatting artifacts and normalize whitespace.
+
+> Andrew! Can you explain the exact regex patterns that you used here?
+
+For reducing excess lines, the "lower bound" is 3 and the "upper bound" is infinite. We get to detect any number of newlines series that are 3 or more, and `sub` them with just 2 newlines.
+
+For reducing excess spaces, the "lower bound" is 2 and the "upper bound" is infinite. We get to detect any number of spaces series that are 2 or more, and `sub` them with just 1 space.
+
+The tradeoff here is that we might lose some intentional formatting (poetry, code blocks) in exchange for a more readable and consistent format.
+However, chances are that a PDF novel that our readers consider worthy of illustration are likely not going to be strictly formatted in an academic or abstract way.
+
+Now that the text has been cleaned, it's ready to be displayed to the reader and also ready to be sent to Gemini for analysis.
