@@ -431,7 +431,6 @@ Good eye! `await` is one of our FastAPI async keywords.
 In this case, it pauses the `upload_pdf()` function until the file is read.
 In the meantime, our app can work on handling other readers' requests, generating images, and managing the story.
 
-Let's explain it in Mickey Mouse terms.
 Think of Mangaroo as a pizzeria with a single chef (FastAPI).
 It takes a while for the pizza (PDF File) to bake (process).
 A lazy (synchronous) chef would stand there and watch the pizza bake until it's done.
@@ -651,7 +650,7 @@ PyMuPDF is a Python binding (a wrapper for code written in other programming lan
 That means that, in a way, we have gifted Mangaroo the horsepower of an F1 engine (C) with a simple steering wheel (Python API)!
 There are also some alternatives to PyMuPDF, such as PyPDF2 (slower, but more lightweight) and pdfplumber (better for tables).
 
-We've imported `pymupdf` by the name of `fitz` since it's a tutorial convention.
+We've imported `pymupdf` by the name of `fitz` since it's a convention.
 It's done a great job at extracting text, and it also has the capability to extract images, metadata, and even render pages.
 
 When PyMuPDF (aka Fitz) opens an invalid file with a .pdf extension, it will throw an exception and we will remain safe.
@@ -807,36 +806,11 @@ Reader text display is a simple process for what is essentially a glorified e-re
 
 ![Reader path diagram](assets/diagrams/mangaroo-text.png)
 
-## reader.html - Frontend JavaScript
+## reader.html
 
 The reader interface uses vanilla JavaScript to fetch page text asynchronously and update the DOM. This creates a smooth, SPA-like experience without a full framework.
 
-**Key Discussion Points:**
-- Async/await for API calls: cleaner than callbacks or promises chains
-- DOM manipulation: `innerHTML` vs `textContent` vs `createElement`
-- Why split text on `\n\n`? (Paragraph detection)
-- Template literals for query strings: string interpolation
-- CSS classes for animations (`page-turn-animation`)
-
-> Andrew! Why use vanilla JavaScript instead of React/Vue/Svelte?
-
-**Answer these in your writing:**
-- Learning fundamentals: vanilla JS teaches core concepts
-- No build step required: faster development iteration
-- Smaller bundle size: no framework overhead
-- Sufficient for this use case: we're not building a complex UI
-- Easier to understand: no JSX, virtual DOM, or reactivity magic
-- Tradeoff: more manual DOM manipulation, no component reusability
-
-> Andrew! What's the difference between `fetch()` and `XMLHttpRequest`?
-
-**Answer these in your writing:**
-- `fetch()` is modern, promise-based API
-- Cleaner syntax with async/await
-- Returns Response object (easier to work with)
-- Better error handling
-- `XMLHttpRequest` is legacy (callback-based)
-- `fetch()` doesn't reject on HTTP errors (need to check `response.ok`)
+The following function `loadPageText` is loaded with exciting async/await, so don't be intimidated by it!
 
 ```javascript
 /**
@@ -900,47 +874,64 @@ nextBtn.addEventListener('click', () => {
     }
 });
 
-// Keyboard shortcuts for navigation
-document.addEventListener('keydown', (e) => {
-    // Don't trigger if user is typing in an input field
-    if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') {
-        return;
-    }
-
-    // Left arrow or A → Previous page
-    if ((e.key === 'ArrowLeft' || e.key === 'a' || e.key === 'A') && !prevBtn.disabled) {
-        loadPageText(currentPage - 1);
-    }
-    // Right arrow or D → Next page
-    else if ((e.key === 'ArrowRight' || e.key === 'd' || e.key === 'D') && !nextBtn.disabled) {
-        loadPageText(currentPage + 1);
-    }
-});
+// [...]
 
 // Initialize: load first page when page loads
 loadPageText(0);
 ```
 
+Aha!
+Our function is an `async function` which means that it returns not an immediate value but a Promise!
+A Promise is a type of object that represents a value that may not be available yet, but will be in the future.
+
+In this case, `loadPageText` returns a Promise that gets resolved when the page text is loaded.
+
+> Andrew! What does the Promise contain? What will it look like once it's resolved?
+
+The Promise will contain the page text once it's resolved.
+
+> Andrew! Why do we need to make this an async/await function? Wouldn't it be faster if it was just a normal function?
+
+Well, remember that we're making an API call to the FastAPI backend. 
+This is an asynchronous operation, so we need to use async/await to handle it.
+It preserves our "pizzeria" strategy of not blocking the main thread while waiting for the API call to complete.
+
+Using async/await also makes the code more readable and easier to understand for humans.
+It's much easier to read than a nested callbacks or promises.
+That's how we avoid what some developers call "callback hell" or the "pyramid of doom".
+
+Now, let's move onto the try catch block.
+You'll first notice 2 consts: `response` and `data`.
+
+- `response` is the raw response from the API call, meaning that it's a `Response` object from the `fetch` API.
+- `data` is the JSON data from the API call, meaning that it's a parsed JSON object from the `response.json()` call. It's esssentially just `response` turned into a JSON object.
+
+If we're successful in our API call, we'll get a `success` key set to `true` and a `text` key set to the page text.
+Then, we simply format the `data` into HTML and insert it into the document object model (DOM) for reader display as the `currentPage` state.
+
+We also call `resetMangaPanel` to reset the manga panel for the new page.
+
+In case of an error in the try-catch block or the API call fails, we'll tell the user that there was an error loading the page.
+
+> Andrew! Why did you decide to use vanilla JavaScript instead of React/Vue/Svelte?
+
+Vanilla JavaScript is a good choice for this use case because it illustrates the core concepts behind web development and API calls. 
+I already have meaningful experience with React for my personal website, so I don't want to overcomplicate this project with a framework.
+Instead, I'm staying true to fundamentals and showing API calls in action.
+
+The tradeoff is that we have to do more manual DOM manipulation and less component reusability, but it's a good learning experience.
+For an ereader that focuses on system design and backend expansions, vanilla JS is already enough.
+
+> Andrew! Speaking of API fundamentals, what even is `fetch()`?
+
+`fetch()` is a modern, promise-based API for making HTTP requests.
+It was really clean syntax with async/await.
+Plus, it returns a `Response` object which handles errors well since it doesn't immediately reject on HTTP errors.
+
 ### Jinja2 Template Variables
 
-The reader.html template receives data from the FastAPI backend via Jinja2 templating. This bridges Python and JavaScript.
-
-**Key Discussion Points:**
-- Server-side rendering vs client-side rendering
-- Template variable syntax: `{{ variable_name }}`
-- Why session_id and total_pages are embedded in JavaScript
-- Security: escaping user input in templates
-- When template is processed: server-side before sending to browser
-
-> Andrew! What is Jinja2 and why do we need it?
-
-**Answer these in your writing:**
-- Jinja2 is a templating engine for Python
-- Lets you embed Python values in HTML
-- Processed server-side (before page reaches user)
-- Alternative: could use API call to get session/metadata
-- Benefit: reduces initial API calls, data is immediately available
-- Used by Flask, FastAPI, Ansible, and many Python projects
+The reader.html template receives data from the FastAPI backend via Jinja2 templating.
+This bridges Python handling our backend and JavaScript handling our frontend.
 
 ```html
 <script>
@@ -956,37 +947,24 @@ The reader.html template receives data from the FastAPI backend via Jinja2 templ
 </script>
 ```
 
+> Andrew! What is Jinja2 and why do we need it?
+
+Jinja2 is what we call a templating engine for Python.
+It lets you embed Python values in HTML, using the `{{ variable_name }}` syntax.
+It processes our template server-side before sending it to the reader's browser.
+
+This makes data available immediately to the reader's browser, and reduces the number of API calls needed.
+It's used by Flask, FastAPI, Ansible, and many other Python projects.
+(It's also why VSCode is telling me that I have some "errors" in reader.html, it just doesn't recognize Jinja2 syntax.)
+
 ## main.py
 
-### get_page_text() - API Route Handler
+Back onto main.py, now we're ready to start displaying text properly!
 
-This route returns the text content for a specific page. It's called by the frontend JavaScript when navigating between pages.
+### get_page_text()
 
-**Key Discussion Points:**
-- Query parameters: `?session_id=xxx&page=0` parsing
-- Why return JSON instead of plain text?
-- Navigation helpers: `has_next`, `has_prev` (UI state management)
-- Error handling: 404 vs 400 vs 500 status codes
-- Session validation: checking if session exists
-
-> Andrew! Why use query parameters instead of putting session_id and page in the URL path?
-
-**Answer these in your writing:**
-- Query params: `/api/get_page_text?session_id=abc&page=5`
-- Path params: `/api/sessions/abc/pages/5`
-- Query params better for optional/multiple filters
-- Path params better for resource identification (RESTful)
-- Either works here; chose query params for simplicity
-- Consistency with form data style
-
-> Andrew! What's the difference between 400, 404, and 500 errors?
-
-**Answer these in your writing:**
-- 400 Bad Request: client sent invalid data (page out of range)
-- 404 Not Found: resource doesn't exist (session not found)
-- 500 Internal Server Error: server-side bug (PDF processing crash)
-- Proper codes help frontend handle errors appropriately
-- User-facing messages should be friendly, not just HTTP codes
+This route returns the text content for a specific page. 
+It's called by the frontend JavaScript when navigating between pages.
 
 ```python
 @app.get("/api/get_page_text")
@@ -1036,36 +1014,28 @@ async def get_page_text(session_id: str, page: int = 0):
         raise HTTPException(status_code=500, detail=str(e))
 ```
 
-### reading_sessions{} - In-Memory Session Storage
+You'll first notice that `get_page_text` will GET the page text from the unique session ID and page number.
+The session must be validated to ensure it exists.
+
+The text is returned as a JSON response with navigation helpers such as `has_next` and `has_prev`.
+This helps manage the UI state and prevent out-of-bounds errors such as trying to navigate to a non-existent page.
+In case there's still an error, we'll raise a 400-series error with the error message.
+
+> Andrew! What's the difference between 400, 404, and 500 errors?
+
+4xx errors are client-side errors, while 5xx errors are server-side errors.
+Here's a brief breakdown of the errors we might encounter on Mangaroo:
+
+- 400 Bad Request: client sent invalid data (page out of range)
+- 404 Not Found: resource doesn't exist (session not found)
+- 500 Internal Server Error: server-side bug (PDF processing crash)
+
+We identify these errors by their status codes, and return them to the frontend.
+User-facing messages should be friendly and not just HTTP codes.
+
+### reading_sessions{}
 
 The `reading_sessions` dictionary is our simple in-memory session store. It maps session IDs to `ReadingSession` objects.
-
-**Key Discussion Points:**
-- Dictionary lookup performance: O(1) average case
-- Memory implications: what happens with 1000 concurrent users?
-- Session cleanup: when do we remove old sessions?
-- Stateless vs stateful servers: this approach is stateful
-- Scaling limitations: can't share sessions across multiple servers
-
-> Andrew! Why use a Python dictionary instead of a database?
-
-**answer these in your writing:**
-- Simplicity: no database setup, perfect for prototype/learning
-- Speed: in-memory access is extremely fast
-- Tradeoff: sessions lost on server restart
-- Not suitable for production: need Redis, PostgreSQL, or similar
-- Session persistence: could serialize to disk/database
-- Alternative: use FastAPI's built-in session middleware
-
-> Andrew! What happens when the server restarts?
-
-**Answer these in your writing:**
-- All sessions are lost (dictionary cleared)
-- Users get 404 errors when trying to access their sessions
-- Need to re-upload PDFs
-- Production solution: persist sessions to database/Redis
-- Could implement graceful shutdown: save sessions before exit
-- Temporary fix: keep server running, use process managers (PM2, systemd)
 
 ```python
 # Dictionary to store active reading sessions
@@ -1079,27 +1049,43 @@ reading_sessions: dict = {}
 # 4. Delete session: del reading_sessions["abc123"]
 ```
 
-### Convenience Functions - extract_page_text()
+The `reading_sessions` dictionary is a simple stateful in-memory session store. 
+It maps session IDs to `ReadingSession` objects.
+It's also lightning-fast to access, with an average case of O(1).
 
-Standalone helper functions provide simpler interfaces for one-off PDF operations without managing object lifecycles.
+> Andrew! Why use a Python dictionary instead of a database?
 
-**Key Discussion Points:**
-- When to use functions vs classes?
-- `try/finally` pattern: ensures cleanup even on errors
-- Context managers: could use `with` statement (Python idiom)
-- Single-responsibility: each function does one thing well
-- API design: convenience functions make library easier to use
+Using a dictionary for Mangaroo is perfect for a quick prototype or learning purposes.
+It's extremely fast and simple, but not suitable for production since sessions are lost on server restart.
+Some options to scale would be using FastAPI's built-in session middleware, or using a database like MongoDB or PostgreSQL.
 
-> Andrew! What's the difference between this and calling PDFProcessor directly?
+If you're interested in a project where I chose to use a database instead of a dictionary, check out the CrawlStars devlog [here](https://github.com/andrewzheng/crawlstars/blob/main/devlog.md)!
 
-**Answer these in your writing:**
-- Convenience function: simpler, single-use interface
-- Class approach: more control, reusable for multiple operations
-- `try/finally` ensures `close()` called even if error occurs
-- Analogy: renting a car (function) vs owning a car (class)
-- Function hides lifecycle management from caller
-- Use function when: one-off operation, don't need state
-- Use class when: multiple operations, need to maintain state
+> Andrew! What happens when the server restarts?
+
+To put it bluntly, all sessions are lost (dictionary cleared).
+Users get 404 errors when trying to access their sessions and need to re-upload their PDFs.
+
+
+## pdf_processor.py
+
+The PDFProcessor's text extraction methods handle the core functionality: getting text from specific pages and cleaning it for display.
+
+Before we dive into specific functions, let's first design the PDFProcessor class and its signature wrapper function, `extract_page_text()`.
+
+> Andrew! Why did you decide to make an entire PDFProcessor class instead of just using the `extract_page_text()` function?
+
+I decided to create a PDFProcessor class to reuse the same PDF object for multiple page extractions which is more efficient API design.
+Having convnenience functions such as `extract_page_text()` is more user-friendly for the frontend.
+It also follows the single-responsibility principle where each function does one thing well.
+
+Think of it like buying a car for prolonged use (such as processing many pages of a PDF novel) rather than just renting the car's function (such as calling a bunch of methods on the PDFProcessor class).
+Using a class fits the use case of maintaining a consistent story state as the reader reads through the novel.
+
+### extract_page_text()
+
+`extract_page_text()` provides a simpler interface for one-off PDF operations without managing object lifecycles.
+It's essentially a neat wrapper around the PDFProcessor class.
 
 ```python
 def extract_page_text(pdf_path: str, page_number: int) -> str:
@@ -1122,47 +1108,15 @@ def extract_page_text(pdf_path: str, page_number: int) -> str:
         processor.close()
 ```
 
-## pdf_processor.py - Text Extraction Methods
+As you can see, `extract_page_text()` is a neat wrapper around the PDFProcessor class containing the key functions `open()`, `get_page_text()`, and `close()`.
+The `try/finally` block ensures that the PDFProcessor is closed properly even if an error occurs.
 
-The PDFProcessor's text extraction methods handle the core functionality: getting text from specific pages and cleaning it for display.
+As a sidenote, PyMuPDF does support other text extraction formats such as "dict", "html", "xml", and "blocks".
+However, plain text is the cleanest and most consistent format for our use case of just displaying e-text.
 
-**Key Discussion Points:**
-- PyMuPDF text extraction: `page.get_text("text")` vs other formats
-- Why validate page_number before accessing?
-- 0-indexed vs 1-indexed: internal (0) vs display (1)
-- Text cleaning as a separate step: separation of concerns
-- Error messages: helpful for debugging
+### get_page_text()
 
-> Andrew! What other text extraction formats does PyMuPDF support besides "text"?
-
-**Answer these in your writing:**
-- `"text"`: plain text (what we use)
-- `"dict"`: structured data with positions, fonts, sizes
-- `"html"`: HTML with formatting preserved
-- `"xml"`: XML representation
-- `"blocks"`: text blocks with coordinates
-- Tradeoff: structured formats give more info but harder to parse
-- Plain text sufficient for our use case (manga generation)
-
-> Andrew! Why raise ValueError instead of returning None or empty string?
-
-**Answer these in your writing:**
-- Explicit errors vs silent failures
-- ValueError signals "this is a programming error"
-- Caller can catch and handle appropriately
-- Better than: checking for None everywhere
-- Alternative: could use Optional[str] return type
-- Fail fast: catch bugs early in development
-
-### get_page_text() - Core Extraction Method
-
-This method handles the actual text extraction from PDF pages, with validation and error handling.
-
-**Key Discussion Points:**
-- Validation before operation: fail fast with clear errors
-- Page indexing: array-style [0] access to PDF pages
-- Method chaining: `get_text()` then `_clean_text()`
-- Why underscore prefix for `_clean_text`? (Private method convention)
+`get_page_text()` handles the actual text extraction from PDF pages, with validation and error handling.
 
 ```python
 def get_page_text(self, page_number: int) -> str:
@@ -1197,38 +1151,19 @@ def get_page_text(self, page_number: int) -> str:
     return text
 ```
 
-### _clean_text() - Text Normalization
-
-Cleaning PDF text removes formatting artifacts and normalizes whitespace. This makes text more readable and easier for AI to process.
+As you can see, `get_page_text()` takes the PDF previously extracted by PyMuPDF from the upload path functions (also in `pdf_processor.py`).
+`get_page_text()` also contains multiple safety checks to fail fast by showing errors 
 
 **Key Discussion Points:**
-- Regex patterns: `\n{3,}` means "3 or more newlines"
-- Why clean text? PDFs have inconsistent formatting
-- Tradeoff: might lose intentional formatting (poetry, code blocks)
-- `strip()` removes leading/trailing whitespace
-- Why is this a private method? (Implementation detail, may change)
+- Validation before operation: fail fast with clear errors
+- Page indexing: array-style [0] access to PDF pages
+- Method chaining: `get_text()` then `_clean_text()`
+- Why underscore prefix for `_clean_text`? (Private method convention)
 
-> Andrew! Can you explain the regex patterns used here?
 
-**Answer these in your writing:**
-- `\n{3,}`: Match 3 or more consecutive newlines
-- `{3,}`: Quantifier meaning "3 or more"
-- Replace with `\n\n`: normalize to exactly 2 (paragraph break)
-- ` {2,}`: Match 2 or more consecutive spaces
-- Replace with single space: collapse whitespace
-- `re.sub()`: regex substitution (search and replace)
-- Alternative: could use string methods (less powerful)
+### _clean_text()
 
-> Andrew! Why do PDFs have weird formatting in the first place?
-
-**Answer these in your writing:**
-- PDFs designed for visual presentation, not text extraction
-- Text positioned absolutely on page (no inherent structure)
-- Multiple spaces might just be visual positioning
-- Line breaks don't always mean paragraph breaks
-- Tables, columns, headers complicate extraction
-- PyMuPDF does best effort, but artifacts remain
-- Cleaning is necessary post-processing step
+Cleaning PDF text removes formatting artifacts and normalizes whitespace. This makes text more readable and easier for AI to process.
 
 ```python
 def _clean_text(self, text: str) -> str:
@@ -1259,6 +1194,35 @@ def _clean_text(self, text: str) -> str:
     
     return text
 ```
+
+**Key Discussion Points:**
+- Regex patterns: `\n{3,}` means "3 or more newlines"
+- Why clean text? PDFs have inconsistent formatting
+- Tradeoff: might lose intentional formatting (poetry, code blocks)
+- `strip()` removes leading/trailing whitespace
+- Why is this a private method? (Implementation detail, may change)
+
+> Andrew! Can you explain the regex patterns used here?
+
+**Answer these in your writing:**
+- `\n{3,}`: Match 3 or more consecutive newlines
+- `{3,}`: Quantifier meaning "3 or more"
+- Replace with `\n\n`: normalize to exactly 2 (paragraph break)
+- ` {2,}`: Match 2 or more consecutive spaces
+- Replace with single space: collapse whitespace
+- `re.sub()`: regex substitution (search and replace)
+- Alternative: could use string methods (less powerful)
+
+> Andrew! Why do PDFs have weird formatting in the first place?
+
+**Answer these in your writing:**
+- PDFs designed for visual presentation, not text extraction
+- Text positioned absolutely on page (no inherent structure)
+- Multiple spaces might just be visual positioning
+- Line breaks don't always mean paragraph breaks
+- Tables, columns, headers complicate extraction
+- PyMuPDF does best effort, but artifacts remain
+- Cleaning is necessary post-processing step
 
 # Episode 4: Image Generation Path
 

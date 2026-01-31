@@ -431,7 +431,6 @@ Good eye! `await` is one of our FastAPI async keywords.
 In this case, it pauses the `upload_pdf()` function until the file is read.
 In the meantime, our app can work on handling other readers' requests, generating images, and managing the story.
 
-Let's explain it in Mickey Mouse terms.
 Think of Mangaroo as a pizzeria with a single chef (FastAPI).
 It takes a while for the pizza (PDF File) to bake (process).
 A lazy (synchronous) chef would stand there and watch the pizza bake until it's done.
@@ -651,7 +650,7 @@ PyMuPDF is a Python binding (a wrapper for code written in other programming lan
 That means that, in a way, we have gifted Mangaroo the horsepower of an F1 engine (C) with a simple steering wheel (Python API)!
 There are also some alternatives to PyMuPDF, such as PyPDF2 (slower, but more lightweight) and pdfplumber (better for tables).
 
-We've imported `pymupdf` by the name of `fitz` since it's a tutorial convention.
+We've imported `pymupdf` by the name of `fitz` since it's a convention.
 It's done a great job at extracting text, and it also has the capability to extract images, metadata, and even render pages.
 
 When PyMuPDF (aka Fitz) opens an invalid file with a .pdf extension, it will throw an exception and we will remain safe.
@@ -807,6 +806,350 @@ Reader text display is a simple process for what is essentially a glorified e-re
 
 ![Reader path diagram](assets/diagrams/mangaroo-text.png)
 
-## reader.html - Frontend JavaScript
+## reader.html
 
 The reader interface uses vanilla JavaScript to fetch page text asynchronously and update the DOM. This creates a smooth, SPA-like experience without a full framework.
+
+The following function `loadPageText` is loaded with exciting async/await, so don't be intimidated by it!
+
+```javascript
+/**
+ * Load text content for a specific page
+ * Called when navigating between pages
+ * @param {number} page - Page number to load (0-indexed)
+ */
+async function loadPageText(page) {
+    try {
+        // Fetch page text from API
+        const response = await fetch(`/api/get_page_text?session_id=${sessionId}&page=${page}`);
+        const data = await response.json();
+
+        if (data.success) {
+            // Format text into paragraphs
+            // Split on double newlines (paragraph breaks)
+            const paragraphs = data.text.split('\n\n').filter(p => p.trim());
+            const formattedText = paragraphs.map(p => `<p>${p.trim()}</p>`).join('');
+
+            // Insert text with fallback for empty pages
+            textDisplay.innerHTML = formattedText || '<p class="text-gray-400 text-center">This page appears to be empty.</p>';
+
+            // Add page turn animation
+            textDisplay.classList.add('page-turn-animation');
+            setTimeout(() => {
+                textDisplay.classList.remove('page-turn-animation');
+            }, 400);
+
+            // Update state
+            currentPage = page;
+            currentPageSpan.textContent = page + 1;  // Display as 1-indexed
+
+            // Update navigation buttons
+            prevBtn.disabled = !data.has_prev;
+            nextBtn.disabled = !data.has_next;
+
+            // Scroll text panel to top
+            document.getElementById('textContent').scrollTop = 0;
+
+            // Reset manga panel for new page
+            resetMangaPanel();
+        } else {
+            showToast('Error loading page');
+        }
+    } catch (error) {
+        console.error('Error loading page:', error);
+        showToast('Error loading page');
+    }
+}
+
+// Event Listeners - wire up buttons to functions
+prevBtn.addEventListener('click', () => {
+    if (currentPage > 0) {
+        loadPageText(currentPage - 1);
+    }
+});
+
+nextBtn.addEventListener('click', () => {
+    if (currentPage < totalPages - 1) {
+        loadPageText(currentPage + 1);
+    }
+});
+
+// [...]
+
+// Initialize: load first page when page loads
+loadPageText(0);
+```
+
+Aha!
+Our function is an `async function` which means that it returns not an immediate value but a Promise!
+A Promise is a type of object that represents a value that may not be available yet, but will be in the future.
+
+In this case, `loadPageText` returns a Promise that gets resolved when the page text is loaded.
+
+> Andrew! What does the Promise contain? What will it look like once it's resolved?
+
+The Promise will contain the page text once it's resolved.
+
+> Andrew! Why do we need to make this an async/await function? Wouldn't it be faster if it was just a normal function?
+
+Well, remember that we're making an API call to the FastAPI backend. 
+This is an asynchronous operation, so we need to use async/await to handle it.
+It preserves our "pizzeria" strategy of not blocking the main thread while waiting for the API call to complete.
+
+Using async/await also makes the code more readable and easier to understand for humans.
+It's much easier to read than a nested callbacks or promises.
+That's how we avoid what some developers call "callback hell" or the "pyramid of doom".
+
+Now, let's move onto the try catch block.
+You'll first notice 2 consts: `response` and `data`.
+
+- `response` is the raw response from the API call, meaning that it's a `Response` object from the `fetch` API.
+- `data` is the JSON data from the API call, meaning that it's a parsed JSON object from the `response.json()` call. It's esssentially just `response` turned into a JSON object.
+
+If we're successful in our API call, we'll get a `success` key set to `true` and a `text` key set to the page text.
+Then, we simply format the `data` into HTML and insert it into the document object model (DOM) for reader display as the `currentPage` state.
+
+We also call `resetMangaPanel` to reset the manga panel for the new page.
+
+In case of an error in the try-catch block or the API call fails, we'll tell the user that there was an error loading the page.
+
+> Andrew! Why did you decide to use vanilla JavaScript instead of React/Vue/Svelte?
+
+Vanilla JavaScript is a good choice for this use case because it illustrates the core concepts behind web development and API calls. 
+I already have meaningful experience with React for my personal website, so I don't want to overcomplicate this project with a framework.
+Instead, I'm staying true to fundamentals and showing API calls in action.
+
+The tradeoff is that we have to do more manual DOM manipulation and less component reusability, but it's a good learning experience.
+For an ereader that focuses on system design and backend expansions, vanilla JS is already enough.
+
+> Andrew! Speaking of API fundamentals, what even is `fetch()`?
+
+`fetch()` is a modern, promise-based API for making HTTP requests.
+It was really clean syntax with async/await.
+Plus, it returns a `Response` object which handles errors well since it doesn't immediately reject on HTTP errors.
+
+### Jinja2 Template Variables
+
+The reader.html template receives data from the FastAPI backend via Jinja2 templating.
+This bridges Python handling our backend and JavaScript handling our frontend.
+
+```html
+<script>
+    // These values come from Jinja2 template variables
+    // They're set in main.py when rendering this page
+    const sessionId = '{{ session_id }}';    // Unique ID for this reading session
+    // eslint-disable-next-line
+    const totalPages = {{ total_pages | default(0) }};    // How many pages in the PDF
+
+    // Track current state
+    let currentPage = 0;        // Which page we're on (0-indexed)
+    let isGenerating = false;   // Prevent multiple simultaneous generations
+</script>
+```
+
+> Andrew! What is Jinja2 and why do we need it?
+
+Jinja2 is what we call a templating engine for Python.
+It lets you embed Python values in HTML, using the `{{ variable_name }}` syntax.
+It processes our template server-side before sending it to the reader's browser.
+
+This makes data available immediately to the reader's browser, and reduces the number of API calls needed.
+It's used by Flask, FastAPI, Ansible, and many other Python projects.
+(It's also why VSCode is telling me that I have some "errors" in reader.html, it just doesn't recognize Jinja2 syntax.)
+
+## main.py
+
+Back onto main.py, now we're ready to start displaying text properly!
+
+### get_page_text()
+
+This route returns the text content for a specific page. 
+It's called by the frontend JavaScript when navigating between pages.
+
+```python
+@app.get("/api/get_page_text")
+async def get_page_text(session_id: str, page: int = 0):
+    """
+    Get the text content of a specific page.
+    
+    ROUTE: GET /api/get_page_text?session_id=xxx&page=0
+    
+    Args:
+        session_id: Which session (from URL query parameter)
+        page: Which page to get (0-indexed, default is 0)
+        
+    Returns:
+        JSON with page text and navigation info
+    """
+    # Find the session
+    if session_id not in reading_sessions:
+        raise HTTPException(status_code=404, detail="Session not found")
+    
+    session = reading_sessions[session_id]
+    
+    # Validate page number
+    if page < 0 or page >= session.total_pages:
+        raise HTTPException(
+            status_code=400, 
+            detail=f"Page {page} out of range (0-{session.total_pages - 1})"
+        )
+    
+    try:
+        # Get the page text
+        text = session.processor.get_page_text(page)
+        
+        # Update current page tracking
+        session.current_page = page
+        
+        # Return response with navigation helpers
+        return JSONResponse({
+            "success": True,
+            "page": page,
+            "total_pages": session.total_pages,
+            "text": text,
+            "has_next": page < session.total_pages - 1,  # Is there a next page?
+            "has_prev": page > 0  # Is there a previous page?
+        })
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+```
+
+You'll first notice that `get_page_text` will GET the page text from the unique session ID and page number.
+The session must be validated to ensure it exists.
+
+The text is returned as a JSON response with navigation helpers such as `has_next` and `has_prev`.
+This helps manage the UI state and prevent out-of-bounds errors such as trying to navigate to a non-existent page.
+In case there's still an error, we'll raise a 400-series error with the error message.
+
+> Andrew! What's the difference between 400, 404, and 500 errors?
+
+4xx errors are client-side errors, while 5xx errors are server-side errors.
+Here's a brief breakdown of the errors we might encounter on Mangaroo:
+
+- 400 Bad Request: client sent invalid data (page out of range)
+- 404 Not Found: resource doesn't exist (session not found)
+- 500 Internal Server Error: server-side bug (PDF processing crash)
+
+We identify these errors by their status codes, and return them to the frontend.
+User-facing messages should be friendly and not just HTTP codes.
+
+### reading_sessions{}
+
+The `reading_sessions` dictionary is our simple in-memory session store. It maps session IDs to `ReadingSession` objects.
+
+```python
+# Dictionary to store active reading sessions
+# Key: session_id (string), Value: ReadingSession object
+reading_sessions: dict = {}
+
+# Example usage:
+# 1. Create session: reading_sessions["abc123"] = ReadingSession(...)
+# 2. Lookup session: session = reading_sessions["abc123"]
+# 3. Check exists: if "abc123" in reading_sessions: ...
+# 4. Delete session: del reading_sessions["abc123"]
+```
+
+The `reading_sessions` dictionary is a simple stateful in-memory session store. 
+It maps session IDs to `ReadingSession` objects.
+It's also lightning-fast to access, with an average case of O(1).
+
+> Andrew! Why use a Python dictionary instead of a database?
+
+Using a dictionary for Mangaroo is perfect for a quick prototype or learning purposes.
+It's extremely fast and simple, but not suitable for production since sessions are lost on server restart.
+Some options to scale would be using FastAPI's built-in session middleware, or using a database like MongoDB or PostgreSQL.
+
+If you're interested in a project where I chose to use a database instead of a dictionary, check out the CrawlStars devlog [here](https://github.com/andrewzheng/crawlstars/blob/main/devlog.md)!
+
+> Andrew! What happens when the server restarts?
+
+To put it bluntly, all sessions are lost (dictionary cleared).
+Users get 404 errors when trying to access their sessions and need to re-upload their PDFs.
+
+
+## pdf_processor.py
+
+The PDFProcessor's text extraction methods handle the core functionality: getting text from specific pages and cleaning it for display.
+
+Before we dive into specific functions, let's first design the PDFProcessor class and its signature wrapper function, `extract_page_text()`.
+
+> Andrew! Why did you decide to make an entire PDFProcessor class instead of just using the `extract_page_text()` function?
+
+I decided to create a PDFProcessor class to reuse the same PDF object for multiple page extractions which is more efficient API design.
+Having convnenience functions such as `extract_page_text()` is more user-friendly for the frontend.
+It also follows the single-responsibility principle where each function does one thing well.
+
+Think of it like buying a car for prolonged use (such as processing many pages of a PDF novel) rather than just renting the car's function (such as calling a bunch of methods on the PDFProcessor class).
+Using a class fits the use case of maintaining a consistent story state as the reader reads through the novel.
+
+### extract_page_text()
+
+`extract_page_text()` provides a simpler interface for one-off PDF operations without managing object lifecycles.
+It's essentially a neat wrapper around the PDFProcessor class.
+
+```python
+def extract_page_text(pdf_path: str, page_number: int) -> str:
+    """
+    Quick function to extract text from a single page.
+    
+    USE THIS WHEN:
+    - You just need one page's text
+    - You don't want to manage open/close yourself
+    
+    Example:
+        text = extract_page_text("book.pdf", 0)  # Get first page
+    """
+    processor = PDFProcessor(pdf_path)
+    try:
+        processor.open()
+        return processor.get_page_text(page_number)
+    finally:
+        # 'finally' ensures close() runs even if there's an error
+        processor.close()
+```
+
+As you can see, `extract_page_text()` is a neat wrapper around the PDFProcessor class containing the key functions `open()`, `get_page_text()`, and `close()`.
+The `try/finally` block ensures that the PDFProcessor is closed properly even if an error occurs.
+
+As a sidenote, PyMuPDF does support other text extraction formats such as "dict", "html", "xml", and "blocks".
+However, plain text is the cleanest and most consistent format for our use case of just displaying e-text.
+
+### get_page_text()
+
+`get_page_text()` handles the actual text extraction from PDF pages, with validation and error handling.
+
+```python
+def get_page_text(self, page_number: int) -> str:
+    """
+    Extract text from a specific page.
+    
+    Args:
+        page_number: Which page to read (0-indexed, so page 1 = 0)
+        
+    Returns:
+        The extracted text from that page
+        
+    Raises:
+        ValueError: If the PDF isn't open or page number is invalid
+    """
+    # Safety check: make sure the PDF is open
+    if not self._doc:
+        raise ValueError("PDF not opened. Call open() first.")
+    
+    # Safety check: make sure page number is valid
+    if page_number < 0 or page_number >= self._total_pages:
+        raise ValueError(f"Page {page_number} out of range (0-{self._total_pages - 1})")
+    
+    # Get the page object from the document
+    page = self._doc[page_number]
+    
+    # Extract text using the "text" format
+    text = page.get_text("text")
+    
+    # Clean up the text before returning
+    text = self._clean_text(text)
+    return text
+```
+
+As you can see, `get_page_text()` takes the PDF previously extracted by PyMuPDF from the upload path functions (also in `pdf_processor.py`).
+`get_page_text()` also contains multiple safety checks to fail fast by showing errors 
