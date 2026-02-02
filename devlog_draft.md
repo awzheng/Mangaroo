@@ -802,7 +802,12 @@ Anyway, now that our environment is set up and configured correctly, we've reach
 
 # Episode 3: Reader Text Display Path
 
-Reader text display is a simple process for what is essentially a glorified e-reader that helps us extract image context.
+Reader text display is a super clean RESTful API design.
+- Frontend requests page resources by using stateless GET endpoints
+- Backend processes request and returns page resources using session-scoped PDF processors
+- Jinja2 bridges server-side data to client-side JavaScript
+
+Thus by seperating our concerns, we can build and improve each layer independently.
 
 ![Reader path diagram](assets/diagrams/mangaroo-text.png)
 
@@ -967,16 +972,16 @@ This route returns the text content for a specific page.
 It's called by the frontend JavaScript when navigating between pages.
 
 ```python
-@app.get("/api/get_page_text")
-async def get_page_text(session_id: str, page: int = 0):
+@app.get("/api/sessions/{session_id}/pages/{page_number}")
+async def get_session_page(session_id: str, page_number: int):
     """
     Get the text content of a specific page.
     
-    ROUTE: GET /api/get_page_text?session_id=xxx&page=0
+    ROUTE: GET /api/sessions/{session_id}/pages/{page_number}
     
     Args:
         session_id: Which session (from URL query parameter)
-        page: Which page to get (0-indexed, default is 0)
+        page_number: Which page to get (0-indexed, default is 0)
         
     Returns:
         JSON with page text and navigation info

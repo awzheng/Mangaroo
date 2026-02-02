@@ -20,9 +20,9 @@ direction down
 }
 
 "User" > "reader.html": "Load page"
-"reader.html" > "Request Text": "GET /api/get_page_text"
+"reader.html" > "Request Text": "GET /api/sessions/{id}/pages/{page}"
 "Request Text" > "main.py": ?session_id =...&page=N
-"main.py" > "Lookup Session": "get_page_text()"
+"main.py" > "Lookup Session": "get_session_page()"
 "Lookup Session" > "reading_sessions{}": "sessions[id]"
 "reading_sessions{}" > "pdf_processor.py": "session.processor"
 "pdf_processor.py" > "Extract Page": "get_page_text(N)"

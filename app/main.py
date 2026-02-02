@@ -22,7 +22,7 @@ ROUTE OVERVIEW:
 - GET  /                    → Upload page (index.html)
 - GET  /reader/{session_id} → Reader page (reader.html)
 - POST /api/upload          → Upload a PDF file
-- GET  /api/get_page_text   → Get text from a specific page
+- GET  /api/sessions/{session_id}/pages/{page_number}   → Get text from a specific page
 - POST /api/generate_panel  → Generate a manga panel
 - GET  /api/story_state     → Get current story context
 - DELETE /api/session/{id}  → Close a reading session
@@ -326,12 +326,17 @@ async def upload_pdf(file: UploadFile = File(...)):
         raise HTTPException(status_code=500, detail=f"Failed to process PDF: {str(e)}")
 
 
-@app.get("/api/get_page_text")
-async def get_page_text(session_id: str, page: int = 0):
+@app.get("/api/sessions/{session_id}/pages/{page_number}")
+async def get_session_page(session_id: str, page_number: int):
     """
-    Get the text content of a specific page.
+    Get the text content of a specific page from a reading session.
     
-    ROUTE: GET /api/get_page_text?session_id=xxx&page=0
+    ROUTE: GET /api/sessions/{session_id}/pages/{page_number}
+    
+    RESTful design:
+    - Resource hierarchy: /sessions/{id}/pages/{page}
+    - Path parameters identify the resource (not query params)
+    - HTTP GET method defines the action (retrieve)
     
     Called by the frontend when user navigates between pages.
     
@@ -341,20 +346,23 @@ async def get_page_text(session_id: str, page: int = 0):
     3. Return text along with navigation info
     
     Args:
-        session_id: Which session (from URL query parameter)
-        page: Which page to get (0-indexed, default is 0)
+        session_id: Which session (from URL path)
+        page_number: Which page to get (0-indexed, from URL path)
         
     Returns:
         JSON with page text and navigation info
         
+    Example Request:
+        GET /api/sessions/a1b2c3d4/pages/5
+        
     Example Response:
         {
             "success": true,
-            "page": 0,
+            "page": 5,
             "total_pages": 100,
             "text": "Chapter 1...",
             "has_next": true,
-            "has_prev": false
+            "has_prev": true
         }
     """
     # Find the session
@@ -364,27 +372,27 @@ async def get_page_text(session_id: str, page: int = 0):
     session = reading_sessions[session_id]
     
     # Validate page number
-    if page < 0 or page >= session.total_pages:
+    if page_number < 0 or page_number >= session.total_pages:
         raise HTTPException(
             status_code=400, 
-            detail=f"Page {page} out of range (0-{session.total_pages - 1})"
+            detail=f"Page {page_number} out of range (0-{session.total_pages - 1})"
         )
     
     try:
         # Get the page text
-        text = session.processor.get_page_text(page)
+        text = session.processor.get_page_text(page_number)
         
         # Update current page tracking
-        session.current_page = page
+        session.current_page = page_number
         
         # Return response with navigation helpers
         return JSONResponse({
             "success": True,
-            "page": page,
+            "page": page_number,
             "total_pages": session.total_pages,
             "text": text,
-            "has_next": page < session.total_pages - 1,  # Is there a next page?
-            "has_prev": page > 0  # Is there a previous page?
+            "has_next": page_number < session.total_pages - 1,  # Is there a next page?
+            "has_prev": page_number > 0  # Is there a previous page?
         })
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))

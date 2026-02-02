@@ -393,7 +393,7 @@ The app exposes a REST API documented at `http://localhost:8000/docs` when runni
 | `/` | GET | Upload page HTML |
 | `/reader/{session_id}` | GET | Reader interface HTML |
 | `/api/upload` | POST | Upload PDF and create session |
-| `/api/get_page_text` | GET | Get text for specific page |
+| `/api/sessions/{session_id}/pages/{page_number}` | GET | Get text for specific page |
 | `/api/generate_panel` | POST | Generate manga panel |
 | `/api/story_state` | GET | Get Story Bible state |
 | `/api/session/{session_id}` | DELETE | Close reading session |

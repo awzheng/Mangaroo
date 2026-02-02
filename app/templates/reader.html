@@ -446,8 +446,8 @@ KEYBOARD SHORTCUTS:
          */
         async function loadPageText(page) {
             try {
-                // Fetch page text from API
-                const response = await fetch(`/api/get_page_text?session_id=${sessionId}&page=${page}`);
+                // Fetch page text from RESTful API endpoint
+                const response = await fetch(`/api/sessions/${sessionId}/pages/${page}`);
                 const data = await response.json();
 
                 if (data.success) {
