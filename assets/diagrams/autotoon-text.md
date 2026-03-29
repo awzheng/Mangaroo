@@ -1,5 +1,5 @@
 ```eraser.io
-title Mangaroo Reader Text Display
+title Autotoon Reader Text Display
 direction down
 "User" [shape: oval, icon: user, color: blue]
 "templates/" [color: green] {

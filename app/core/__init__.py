@@ -1,2 +1,2 @@
-# Core modules for Mangaroo
+# Core modules for Autotoon
 

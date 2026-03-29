@@ -1,7 +1,7 @@
-# Mangaroo DevLog
+# Autotoon DevLog
 
-This is the start of an authentic and energetic devlog about why and how I built Mangaroo. 
-I will justify all of my design choices by sharing my thought processes for every decision I made as I was building Mangaroo. 
+This is the start of an authentic and energetic devlog about why and how I built Autotoon. 
+I will justify all of my design choices by sharing my thought processes for every decision I made as I was building Autotoon. 
 I have also included the most frequently asked questions (and the questions that I asked myself!) into this devlog to answer the most common concerns about the project! 
 I would appreciate any feedback you may have!
 
@@ -9,17 +9,17 @@ Instagram, Discord @awzheng
 
 ## Important: Devlog Updates Underway
 
-Thanks so much for dropping by the Mangaroo DevLog.
+Thanks so much for dropping by the Autotoon DevLog.
 You may notice that some parts of the devlog are currently under construction.
 That's because I'm in the process of revamping it to match the quality of my other projects, SageWall and Crawlstars.
 See them here: [CrawlStars Devlog](https://github.com/awzheng/CrawlStars/blob/main/devlog.md) and [SageWall Devlog](https://github.com/awzheng/SageWall/blob/main/devlog.md)
 
 With WaterlooWorks and ECE 1B filling up my schedule, progress has been halted for now.
-I will continue to update the devlog as I make progress on Mangaroo!
+I will continue to update the devlog as I make progress on Autotoon!
 Thank you for your patience!
 Please show my other projects your support by reading my dev journey!
 
-## Why I made Mangaroo
+## Why I made Autotoon
 
 I've always wondered about the psychology behind what makes some books more memorable and "readable" than others.
 How come it was so easy for me as a child in the early 2010s to be content with rereading Diary of a Wimpy Kid and Pokemon books over and over again?
@@ -48,7 +48,7 @@ No, not at the moment, but I used to (sometimes), and I'm open to suggestions!
 
 Now that we got the intro out of the way (please don't attack me for "using AI art!"), we can start the system design process (my favourite).
 
-The main intention behind making Mangaroo was to build something using the FastAPI framework.
+The main intention behind making Autotoon was to build something using the FastAPI framework.
 
 ## Understanding FastAPI
 
@@ -76,7 +76,7 @@ Here's the sequence of events:
 FastAPI provides structure to the chaos of our app and is gonna make development a lot smoother.
 
 To me, that's a meaningful advantage in terms of efficiency and productivity.
-I chose FastAPI to be the foundation of Mangaroo since it's the perfect tool to call Gemini and Imagen APIs while also practicing my software and system design skills.
+I chose FastAPI to be the foundation of Autotoon since it's the perfect tool to call Gemini and Imagen APIs while also practicing my software and system design skills.
 
 Yes, remember that we're using using two AIs in sequence: Gemini and Imagen.
 FastAPI natively supports Python's `async` and `await` keywords, which is perfect for our use case. 
@@ -110,7 +110,7 @@ It makes our API documentation way more human-readable so that we can test our e
 
 Uvicorn is an ASGI server that runs our FastAPI application written in python.
 ASGI stands for Async Server Gateway Interface, making it perfect for our async FastAPI application.
-It also supports other features in case I wish to expand Mangaroo or experiment with other tools:
+It also supports other features in case I wish to expand Autotoon or experiment with other tools:
 - WebSocket support
 - HTTP/2 support
 - HTTP/3 support
@@ -128,19 +128,19 @@ See them here: [CrawlStars Devlog](https://github.com/awzheng/CrawlStars/blob/ma
 
 ### Upload Path
 
-![Upload path system diagram](assets/diagrams/mangaroo-upload.png)
+![Upload path system diagram](assets/diagrams/autotoon-upload.png)
 
 ### Text Display Path
 
-![Text display path system diagram](assets/diagrams/mangaroo-text.png)
+![Text display path system diagram](assets/diagrams/autotoon-text.png)
 
 ### Image Generation Path
 
-![Image generation path system diagram](assets/diagrams/mangaroo-image.png)
+![Image generation path system diagram](assets/diagrams/autotoon-image.png)
 
 ### Story Bible Logic
 
-![Story bible logic system diagram](assets/diagrams/mangaroo-bible.png)
+![Story bible logic system diagram](assets/diagrams/autotoon-bible.png)
 
 > Andrew! Story bible? What's a story bible?
 
@@ -168,7 +168,7 @@ In a larger system, I'd use the Data Access layer to handle external API calls.
 And here's the project's core file structure:
 
 ```
-Mangaroo/
+Autotoon/
 ├── api/
 │   ├── __init__.py
 │   └── index.py                    # Vercel serverless entry point
@@ -207,18 +207,18 @@ Here are some brief descriptions of the project structure in table format:
 | `app/static/css/` | CSS stylesheets for the frontend | N/A |
 | `uploads/` | Directory for temporary storage of uploaded PDF files (local dev only, uses /tmp on Vercel) | N/A |
 
-## My plans to scale Mangaroo's System Design
+## My plans to scale Autotoon's System Design
 
 Yes, I know, lots of people tend to stuff their future plans to the bottom of their writing.
-However, since I always start my devlog Episode 1 from a system design standpoint, I'm willing to show off the potential of Mangaroo and get a clear idea of what I can do to scale it.
+However, since I always start my devlog Episode 1 from a system design standpoint, I'm willing to show off the potential of Autotoon and get a clear idea of what I can do to scale it.
 
-Let's face it, I'm currently in 1B and I haven't had the time to scale Mangaroo yet.
-Lots of my time after building Mangaroo has been spent on CrawlStars, SageWall, school, and co-op search.
+Let's face it, I'm currently in 1B and I haven't had the time to scale Autotoon yet.
+Lots of my time after building Autotoon has been spent on CrawlStars, SageWall, school, and co-op search.
 
 However, my plans for the future are to scale this project using my knowledge of distributed systems gained from my other projects, CrawlStars and SageWall.
-I'll be revisting the Mangaroo system design in the future and here are some of my plans to take Mangaroo to the next level:
+I'll be revisting the Autotoon system design in the future and here are some of my plans to take Autotoon to the next level:
 
-> Andrew, your story bible works for sessions, but how would we scale Mangaroo to a distributed system?
+> Andrew, your story bible works for sessions, but how would we scale Autotoon to a distributed system?
 
 We would have to store the story bibles in a database.
 I would choose a database such as MongoDB since it's a NoSQL database that's easy to scale and provides a lot of features out of the box.
@@ -228,7 +228,7 @@ Additionally, we should implement session cleanup in order to prevent memory lea
 
 We could also store the user's PDF file uploads on a cloud database such as AWS S3, which I used in SageWall (read the devlog here: https://github.com/andrewzheng/SageWall/blob/main/devlog.md)
 
-Now that we've established the scope and functions behind Mangaroo, let's get building!
+Now that we've established the scope and functions behind Autotoon, let's get building!
 
 # Episode 2: Upload Path
 
@@ -236,7 +236,7 @@ My devlogs follow the path of data flow through the system diagram.
 We'll begin by examining `main.py` and follow through all the functions in the upload path.
 Don't worry about frontend yet, Episode 3 covers reader UI in more depth!
 
-![Upload path diagram](assets/diagrams/mangaroo-upload.png)
+![Upload path diagram](assets/diagrams/autotoon-upload.png)
 
 ## main.py 
 
@@ -431,7 +431,7 @@ Good eye! `await` is one of our FastAPI async keywords.
 In this case, it pauses the `upload_pdf()` function until the file is read.
 In the meantime, our app can work on handling other readers' requests, generating images, and managing the story.
 
-Think of Mangaroo as a pizzeria with a single chef (FastAPI).
+Think of Autotoon as a pizzeria with a single chef (FastAPI).
 It takes a while for the pizza (PDF File) to bake (process).
 A lazy (synchronous) chef would stand there and watch the pizza bake until it's done.
 They would freeze and refuse to take other orders.
@@ -439,9 +439,9 @@ An efficient (asynchronous) chef, on the other hand, would use the downtime to t
 
 Thus, in technical terms, while we `await file.read()`, the current coroutine yields control back to the event loop, allowing other coroutines (such as other users' file uploads, story generation, etc.) to run.
 
-Mangaroo is what we call I/O bound because it spends most of its time waiting for I/O operations (file reading, API calls, etc.) to complete.
+Autotoon is what we call I/O bound because it spends most of its time waiting for I/O operations (file reading, API calls, etc.) to complete.
 
-If Mangaroo did not have async, it would be held up by 2 slow operations on the critical path:
+If Autotoon did not have async, it would be held up by 2 slow operations on the critical path:
 1. File I/O, reading PDFs from disk (which takes ~100ms for a 10MB file)
 2. API Calls which take at least 2-3 seconds for Gemini and 5-10 seconds for Imagen
 
@@ -473,9 +473,9 @@ One user won't accidentally access another user's session.
 One tradeoff of having these ridiculously long UUIDs is that they're hard to read and render.
 Since the UUID can get really long (making it hard to render/read), `[:8]` is used to truncate it to the first 8 characters to make it more human-readable.
 
-At the moment, the possibility of Mangaroo useres sharing an UUID is negligible.
+At the moment, the possibility of Autotoon useres sharing an UUID is negligible.
 
-> Andrew! What if you happened to scale Mangaroo and users shared the same 8-character UID?
+> Andrew! What if you happened to scale Autotoon and users shared the same 8-character UID?
 
 There are two main production fixes we could implement to solve that issue.
 
@@ -647,7 +647,7 @@ It can be kinda compared to creating helper functions for custom classes in your
 > Andrew! What even is PyMuPDF and why did you choose it over other PDF libraries?
 
 PyMuPDF is a Python binding (a wrapper for code written in other programming languages) for the MuPDF library which is a framework written in C.
-That means that, in a way, we have gifted Mangaroo the horsepower of an F1 engine (C) with a simple steering wheel (Python API)!
+That means that, in a way, we have gifted Autotoon the horsepower of an F1 engine (C) with a simple steering wheel (Python API)!
 There are also some alternatives to PyMuPDF, such as PyPDF2 (slower, but more lightweight) and pdfplumber (better for tables).
 
 We've imported `pymupdf` by the name of `fitz` since it's a convention.
@@ -666,7 +666,7 @@ As an added bonus, our system design diagram (user upload data path) is clear an
 
 ## story_manager.py
 
-`StoryBible` is the absolute hero of quantifying what I've achieved through Mangaroo.
+`StoryBible` is the absolute hero of quantifying what I've achieved through Autotoon.
 By running some calculations, I've narrowed down the fact that I reduced context token usage by **92%** by storing plot context in a JSON instead of forcing Gemini to reread the story and rewatch all of our images every time we want to create a new page (in order to preserve a relatively consistent user experience).
 
 Essentially, the `StoryBible` class maintains narrative context across pages. 
@@ -759,7 +759,7 @@ Maintaining a Story Bible (aka show bible or pitch bible) is a practice used in 
 It's not just a word that I made up!
 Read more about it on [Wikipedia](https://en.wikipedia.org/wiki/Bible_(screenwriting)).
 
-Having a story bible gives Mangaroo very distinct advantages as a standalone FastAPI app rather than a generic AI wrapper:
+Having a story bible gives Autotoon very distinct advantages as a standalone FastAPI app rather than a generic AI wrapper:
 
 - OOP system design
 - 92% reduced context token usage
@@ -794,7 +794,7 @@ After initializing the `StoryBible`, we call `self._configure_genai()` to config
 
 > Andrew! Why Gemini 1.5 Pro instead of Flash or other models?
 
-At the time of making Mangaroo (Nov 2025), Gemini 1.5 Pro was the best model for my use case.
+At the time of making Autotoon (Nov 2025), Gemini 1.5 Pro was the best model for my use case.
 It's great at handling JSON format extraction (character names, descriptions) and reasoning with complex tasks such as extracting story context.
 I'm thinking of switching to Gemini 3 Flash in the future.
 
@@ -809,7 +809,7 @@ Reader text display is a super clean RESTful API design.
 
 Thus by seperating our concerns, we can build and improve each layer independently.
 
-![Reader path diagram](assets/diagrams/mangaroo-text.png)
+![Reader path diagram](assets/diagrams/autotoon-text.png)
 
 ## reader.html
 
@@ -1029,7 +1029,7 @@ In case there's still an error, we'll raise a 400-series error with the error me
 > Andrew! What's the difference between 400, 404, and 500 errors?
 
 4xx errors are client-side errors, while 5xx errors are server-side errors.
-Here's a brief breakdown of the errors we might encounter on Mangaroo:
+Here's a brief breakdown of the errors we might encounter on Autotoon:
 
 - 400 Bad Request: client sent invalid data (page out of range)
 - 404 Not Found: resource doesn't exist (session not found)
@@ -1060,7 +1060,7 @@ It's also lightning-fast to access, with an average case of O(1).
 
 > Andrew! Why use a Python dictionary instead of a database?
 
-Using a dictionary for Mangaroo is perfect for a quick prototype or learning purposes.
+Using a dictionary for Autotoon is perfect for a quick prototype or learning purposes.
 It's extremely fast and simple, but not suitable for production since sessions are lost on server restart.
 Some options to scale would be using FastAPI's built-in session middleware, or using a database like MongoDB or PostgreSQL.
 

@@ -1,5 +1,5 @@
 ```eraser.io
-title Mangaroo Image Generation
+title Autotoon Image Generation
 direction down
 
 "User" [shape: oval, icon: user, color: blue]

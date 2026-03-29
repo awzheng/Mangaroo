@@ -1,6 +1,6 @@
 """
 ========================================
-Story Manager Module for Mangaroo
+Story Manager Module for Autotoon
 ========================================
 
 *** CRITICAL FILE - THE HEART OF THE APP ***
