@@ -1,4 +1,4 @@
-# Mangaroo
+# Autotoon
 
 > AI-Powered Smart Reader - Transform your novels into manga illustrations
 
@@ -14,7 +14,7 @@ Also, I do not support the commercialization of AI art. I am using AI art purely
 
 Check it out here: [devlog.md](devlog.md)
 
-![mangaroo thumbnail](assets/mangaroo-thumbnail.png)
+![autotoon thumbnail](assets/autotoon-thumbnail.png)
 
 ## Table of Contents
 
@@ -33,7 +33,7 @@ Check it out here: [devlog.md](devlog.md)
 
 ## Overview
 
-Mangaroo is a web application that transforms PDF novels into manga-style visual experiences. It uses AI to read your novel page-by-page and generate manga illustrations that maintain visual continuity throughout your story.
+Autotoon is a web application that transforms PDF novels into manga-style visual experiences. It uses AI to read your novel page-by-page and generate manga illustrations that maintain visual continuity throughout your story.
 
 In order to save credits, the app features a Story Bible that tracks characters, settings, and visual elements across pages to ensure consistent art style and character appearances, similar to how a TV show maintains continuity across episodes.
 
@@ -41,19 +41,19 @@ In order to save credits, the app features a Story Bible that tracks characters,
 
 ### Upload & Session Creation
 
-![Upload & Session Creation](assets/diagrams/mangaroo-upload.png)
+![Upload & Session Creation](assets/diagrams/autotoon-upload.png)
 
 ### Reader Text Display
 
-![Reader Text Display](assets/diagrams/mangaroo-text.png)
+![Reader Text Display](assets/diagrams/autotoon-text.png)
 
 ### Image Generation
 
-![Image Generation](assets/diagrams/mangaroo-image.png)
+![Image Generation](assets/diagrams/autotoon-image.png)
 
 ### Story Bible Logic
 
-![Story Bible](assets/diagrams/mangaroo-bible.png)
+![Story Bible](assets/diagrams/autotoon-bible.png)
 
 ## Features
 
@@ -97,8 +97,8 @@ Before you begin, ensure you have:
 Clone the repository or download it as a ZIP:
 
 ```bash
-git clone https://github.com/awzheng/Mangaroo.git
-cd Mangaroo
+git clone https://github.com/awzheng/Autotoon.git
+cd Autotoon
 ```
 
 If you downloaded a ZIP file, extract it and navigate to the folder in your terminal.
@@ -133,7 +133,7 @@ This will install FastAPI, Uvicorn, PyMuPDF, Google AI libraries, and other depe
 
 #### 4. Get Your API Key
 
-Mangaroo requires a Google Gemini API key:
+Autotoon requires a Google Gemini API key:
 
 1. Visit [Google AI Studio](https://aistudio.google.com/app/apikey)
 2. Sign in with your Google account
@@ -164,7 +164,7 @@ You can customize other settings in the `.env` file:
 GEMINI_API_KEY=your_api_key_here
 
 # Optional (these have defaults)
-APP_NAME=Mangaroo
+APP_NAME=Autotoon
 DEBUG=false
 UPLOAD_DIR=uploads
 MAX_FILE_SIZE_MB=50
@@ -184,12 +184,12 @@ uvicorn app.main:app --reload
 
 You should see output like:
 ```
-INFO:     Will watch for changes in these directories: ['/path/to/Mangaroo']
+INFO:     Will watch for changes in these directories: ['/path/to/Autotoon']
 INFO:     Uvicorn running on http://127.0.0.1:8000 (Press CTRL+C to quit)
 INFO:     Started reloader process
 INFO:     Started server process
 INFO:     Waiting for application startup.
-Mangaroo is ready!
+Autotoon is ready!
 Upload a PDF novel to transform it into manga
 INFO:     Application startup complete.
 ```
@@ -207,7 +207,7 @@ or
 http://127.0.0.1:8000
 ```
 
-You should see the Mangaroo upload page.
+You should see the Autotoon upload page.
 
 ### Stopping the Server
 
@@ -352,12 +352,12 @@ pip install -r requirements.txt
 1. Check that you're using Python 3.9 or higher: `python --version`
 2. Verify all files are in place (see Project Structure below)
 3. Try running with debug mode: add `DEBUG=true` to your `.env` file
-4. Check the [GitHub Issues](https://github.com/awzheng/Mangaroo/issues) page
+4. Check the [GitHub Issues](https://github.com/awzheng/Autotoon/issues) page
 
 ## Project Structure
 
 ```
-Mangaroo/
+Autotoon/
 ├── app/                      # Main application code
 │   ├── __init__.py          # Package initializer
 │   ├── main.py              # FastAPI app and routes
@@ -465,7 +465,7 @@ This project is licensed under the MIT License. See the LICENSE file for details
 ## Support
 
 - **Documentation:** See this README
-- **Issues:** [GitHub Issues](https://github.com/awzheng/Mangaroo/issues)
+- **Issues:** [GitHub Issues](https://github.com/awzheng/Autotoon/issues)
 - **API Docs:** `http://localhost:8000/docs` when running
 
 ---

@@ -1,5 +1,5 @@
 ```eraser.io
-title Mangaroo Upload & Session Creation
+title Autotoon Upload & Session Creation
 direction right
 "User" [shape: oval, icon: user, color: blue]
 "templates/" [color: green] {

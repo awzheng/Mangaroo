@@ -1,6 +1,6 @@
 """
 ========================================
-Image Generation Module for Mangaroo
+Image Generation Module for Autotoon
 ========================================
 
 This file handles creating manga-style images using Google's Imagen 3 AI via Vertex AI.

@@ -1,2 +1,2 @@
-# Mangaroo - AI-Powered Smart Reader
+# Autotoon - AI-Powered Smart Reader
 

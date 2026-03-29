@@ -1,5 +1,5 @@
 ```eraser.io
-title Mangaroo Story Bible Logic
+title Autotoon Story Bible Logic
 direction right
 
 Input PDF [shape: oval, icon: file-pdf, color: blue]

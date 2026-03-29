@@ -1,6 +1,6 @@
 """
 ========================================
-PDF Processing Module for Mangaroo
+PDF Processing Module for Autotoon
 ========================================
 
 This file handles everything related to reading PDF files.

@@ -1,6 +1,6 @@
 """
 ========================================
-Configuration Module for Mangaroo
+Configuration Module for Autotoon
 ========================================
 
 This file handles loading settings from environment variables.
@@ -64,7 +64,7 @@ class Settings(BaseSettings):
     
     # ---- App Configuration ----
     # The name of our application
-    app_name: str = "Mangaroo"
+    app_name: str = "Autotoon"
     
     # Debug mode: when True, shows more detailed error messages
     # Set to False in production for security
